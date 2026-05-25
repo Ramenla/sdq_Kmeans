@@ -11,8 +11,7 @@ class ClusterResult extends Model
 
     protected $fillable = [
         'clustering_history_id',
-        'user_id',
-        'sdq_score_id',
+        'skor_sdq_id',
         'cluster_number',
     ];
 
@@ -22,15 +21,9 @@ class ClusterResult extends Model
         return $this->belongsTo(ClusteringHistory::class, 'clustering_history_id');
     }
 
-    // Relasi Balik ke Siswa
-    public function user()
+    // Relasi Balik ke Skor SDQ
+    public function skorSdq()
     {
-        return $this->belongsTo(User::class);
-    }
-
-    // Relasi Balik ke Skor SDQ yang dipakai saat klastering tersebut
-    public function sdqScore()
-    {
-        return $this->belongsTo(SdqScore::class);
+        return $this->belongsTo(SkorSdq::class, 'skor_sdq_id');
     }
 }

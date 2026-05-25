@@ -133,6 +133,14 @@
             </div>
         </div>
     @endif
+    @if(session('error'))
+        <div id="toast-error-session" class="toast-notification bg-red-500 text-white">
+            <div class="flex items-center gap-2">
+                <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                <span>{{ session('error') }}</span>
+            </div>
+        </div>
+    @endif
 
     @include('layouts.sidebar')
 

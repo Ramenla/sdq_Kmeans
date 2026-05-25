@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\Siswa;
+use App\Models\SkorSdq;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
@@ -16,46 +17,40 @@ class SiswaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nomor'         => 'required|unique:users,nomor',
+            'no_hp'         => 'nullable|string|max:20|unique:siswas,no_hp',
             'name'          => 'nullable|string|max:255',
-            'email'         => 'nullable|email|unique:users,email',
+            'email'         => 'nullable|email|unique:siswas,email',
             'kelas'         => 'required|string|max:50',
             'jenis_kelamin' => 'required|in:L,P',
-            'tanggal_lahir' => 'nullable|date',
-            'password'      => 'required|string|min:6',
+            'umur'          => 'nullable|integer',
+            'tanggal_pemeriksaan' => 'nullable|date',
         ], [
-            'nomor.required'         => 'Nomor wajib diisi.',
-            'nomor.unique'           => 'Nomor sudah terdaftar di sistem.',
+            'no_hp.unique'           => 'No HP sudah terdaftar di sistem.',
             'email.email'            => 'Format email tidak valid.',
             'email.unique'           => 'Email sudah terdaftar di sistem.',
             'kelas.required'         => 'Kelas wajib diisi.',
             'jenis_kelamin.required' => 'Jenis kelamin wajib dipilih.',
             'jenis_kelamin.in'       => 'Jenis kelamin harus L atau P.',
-            'password.required'      => 'Password wajib diisi.',
-            'password.min'           => 'Password minimal 6 karakter.',
         ]);
 
-        $user = User::create([
-            'nomor'         => $request->nomor,
-            'name'          => $request->name,
-            'email'         => $request->email,
-            'kelas'         => $request->kelas,
-            'jenis_kelamin' => $request->jenis_kelamin,
-            'tanggal_lahir' => $request->tanggal_lahir,
-            'password'      => Hash::make($request->password),
-            'role'          => 'siswa',
+        $siswa = Siswa::create([
+            'no_hp'               => $request->no_hp,
+            'nama_siswa'          => $request->name,
+            'email'               => $request->email,
+            'kelas'               => $request->kelas,
+            'jenis_kelamin'       => $request->jenis_kelamin,
+            'umur'                => $request->umur,
         ]);
 
-        // Buat riwayat skor kosong agar siswa tampil di tabel
-        \App\Models\SdqScore::create([
-            'user_id'        => $user->id,
-            'e_score'        => 0,
-            'c_score'        => 0,
-            'h_score'        => 0,
-            'p_score'        => 0,
-            'pro_score'      => 0,
-            'skor_kesulitan' => 0,
-            'umur_saat_tes'  => $request->tanggal_lahir ? \Carbon\Carbon::parse($request->tanggal_lahir)->age : 0,
+        SkorSdq::create([
+            'siswa_id'            => $siswa->id,
+            'tanggal_pemeriksaan' => $request->tanggal_pemeriksaan ?? now()->format('Y-m-d'),
+            'skor_e'              => 0,
+            'skor_c'              => 0,
+            'skor_h'              => 0,
+            'skor_p'              => 0,
+            'skor_pr'             => 0,
+            'skor_diff'           => 0,
         ]);
 
         return redirect()->route('dashboard.guru')->with('success', 'Data siswa berhasil ditambahkan!');
@@ -64,18 +59,18 @@ class SiswaController extends Controller
     /**
      * Update data siswa yang sudah ada.
      */
-    public function update(Request $request, User $siswa)
+    public function update(Request $request, Siswa $siswa)
     {
         $request->validate([
-            'nomor'         => 'required|unique:users,nomor,' . $siswa->id,
+            'no_hp'         => 'nullable|string|max:20|unique:siswas,no_hp,' . $siswa->id,
             'name'          => 'nullable|string|max:255',
-            'email'         => 'nullable|email|unique:users,email,' . $siswa->id,
+            'email'         => 'nullable|email|unique:siswas,email,' . $siswa->id,
             'kelas'         => 'required|string|max:50',
             'jenis_kelamin' => 'required|in:L,P',
-            'tanggal_lahir' => 'nullable|date',
+            'umur'          => 'nullable|integer',
+            'tanggal_pemeriksaan' => 'nullable|date',
         ], [
-            'nomor.required'         => 'Nomor wajib diisi.',
-            'nomor.unique'           => 'Nomor sudah terdaftar di sistem.',
+            'no_hp.unique'           => 'No HP sudah terdaftar di sistem.',
             'email.email'            => 'Format email tidak valid.',
             'email.unique'           => 'Email sudah terdaftar di sistem.',
             'kelas.required'         => 'Kelas wajib diisi.',
@@ -84,13 +79,25 @@ class SiswaController extends Controller
         ]);
 
         $siswa->update([
-            'nomor'         => $request->nomor,
-            'name'          => $request->name,
-            'email'         => $request->email,
-            'kelas'         => $request->kelas,
-            'jenis_kelamin' => $request->jenis_kelamin,
-            'tanggal_lahir' => $request->tanggal_lahir,
+            'no_hp'               => $request->no_hp,
+            'nama_siswa'          => $request->name,
+            'email'               => $request->email,
+            'kelas'               => $request->kelas,
+            'jenis_kelamin'       => $request->jenis_kelamin,
+            'umur'                => $request->umur,
         ]);
+
+        if ($request->filled('tanggal_pemeriksaan')) {
+            $skor = $siswa->skorSdq()->latest('tanggal_pemeriksaan')->first();
+            if ($skor) {
+                $skor->update(['tanggal_pemeriksaan' => $request->tanggal_pemeriksaan]);
+            } else {
+                SkorSdq::create([
+                    'siswa_id'            => $siswa->id,
+                    'tanggal_pemeriksaan' => $request->tanggal_pemeriksaan,
+                ]);
+            }
+        }
 
         return redirect()->route('dashboard.guru')->with('success', 'Data siswa berhasil diperbarui!');
     }
@@ -98,11 +105,26 @@ class SiswaController extends Controller
     /**
      * Hapus data siswa dari database.
      */
-    public function destroy(User $siswa)
+    public function destroy(Siswa $siswa)
     {
         $siswa->delete();
 
         return redirect()->route('dashboard.guru')->with('success', 'Data siswa berhasil dihapus!');
+    }
+
+    /**
+     * Hapus beberapa data siswa sekaligus.
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:siswas,id'
+        ]);
+
+        Siswa::whereIn('id', $request->ids)->delete();
+
+        return redirect()->route('dashboard.guru')->with('success', count($request->ids) . ' data siswa berhasil dihapus!');
     }
 
     /**

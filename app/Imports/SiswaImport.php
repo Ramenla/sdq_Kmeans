@@ -2,79 +2,83 @@
 
 namespace App\Imports;
 
-use App\Models\User;
-use App\Models\SdqScore;
+use App\Models\Siswa;
+use App\Models\SkorSdq;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SiswaImport implements ToCollection, WithHeadingRow
 {
-    /**
-    * @param Collection $rows
-    */
     public function collection(Collection $rows)
     {
+        if ($rows->isEmpty()) {
+            throw new \Exception('File Excel terbaca kosong atau format baris header tidak ditemukan.');
+        }
+
         foreach ($rows as $row) {
-            // Jika "No" (nomor) kosong, lewati baris ini
-            if (empty($row['no']) && empty($row['nomor'])) {
-                continue;
+            $noHp  = $row['no_hp'] ?? $row['nomor_hp'] ?? $row['hp'] ?? $row['no_whatsapp'] ?? null;
+            
+            // Lewati jika no_hp kosong karena kita butuh identifier
+            if (empty($noHp)) {
+                throw new \Exception('Kolom no_hp kosong atau tidak ditemukan! Kolom yang tersedia: ' . implode(', ', array_keys($row->toArray())));
             }
 
-            $nomor = $row['no'] ?? $row['nomor'] ?? null;
             $email = $row['email'] ?? null;
-            $noHp  = $row['no_hp'] ?? null;
             
             // Format Tanggal Pemeriksaan
+            $rawDate = $row['tanggal_pemeriksaan'] ?? $row['tanggal'] ?? $row['waktu'] ?? $row['waktu_pengisian'] ?? $row['timestamp'] ?? null;
             $tanggalTes = null;
-            if (!empty($row['tanggal_pemeriksaan'])) {
+            if (!empty($rawDate)) {
                 try {
-                    $tanggalTes = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['tanggal_pemeriksaan'])->format('Y-m-d H:i:s');
-                } catch (\Exception $e) {
-                    $tanggalTes = Carbon::parse($row['tanggal_pemeriksaan'])->format('Y-m-d H:i:s');
+                    if (is_numeric($rawDate)) {
+                        $tanggalTes = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($rawDate)->format('Y-m-d');
+                    } else {
+                        $tanggalTes = Carbon::parse($rawDate)->format('Y-m-d');
+                    }
+                } catch (\Throwable $e) {
+                    $tanggalTes = now()->format('Y-m-d');
                 }
             } else {
-                $tanggalTes = now();
+                $tanggalTes = now()->format('Y-m-d');
             }
 
-            // Cari atau buat User berdasarkan nomor
-            $user = User::firstOrCreate(
-                ['nomor' => $nomor],
+            // Bersihkan data umur (misal "17 Tahun" -> 17)
+            $rawUmur = $row['usia'] ?? $row['umur'] ?? null;
+            $umur = $rawUmur ? (int) preg_replace('/[^0-9]/', '', $rawUmur) : null;
+
+            // Bersihkan data jenis kelamin (menjadi 'L' atau 'P')
+            $rawJk = strtoupper(trim($row['jenis_kelamin'] ?? 'L'));
+            $jenisKelamin = 'L';
+            if (in_array($rawJk, ['P', 'PEREMPUAN', 'WOMAN', 'FEMALE', 'PR', 'WANITA'])) {
+                $jenisKelamin = 'P';
+            }
+
+            // Cari atau buat Siswa berdasarkan no_hp
+            $siswa = Siswa::updateOrCreate(
+                ['no_hp' => $noHp],
                 [
-                    'name'          => $row['nama'] ?? $row['nama_siswa'] ?? null, 
+                    'nama_siswa'    => $row['nama'] ?? $row['nama_siswa'] ?? null, 
                     'email'         => $email,
-                    'no_hp'         => $noHp,
                     'kelas'         => $row['kelas'] ?? '-',
-                    'jenis_kelamin' => strtoupper($row['jenis_kelamin'] ?? 'L'),
-                    'password'      => Hash::make('password123'), // Default password
-                    'role'          => 'siswa',
+                    'jenis_kelamin' => $jenisKelamin,
+                    'umur'          => $umur,
                 ]
             );
 
-            // Jika user sudah ada tapi data mau diperbarui, bisa diubah di sini:
-            if (!$user->wasRecentlyCreated) {
-                $user->update([
-                    'email'         => $email ?? $user->email,
-                    'no_hp'         => $noHp ?? $user->no_hp,
-                    'kelas'         => $row['kelas'] ?? $user->kelas,
-                    'jenis_kelamin' => strtoupper($row['jenis_kelamin'] ?? $user->jenis_kelamin),
-                ]);
-            }
-
-            // Simpan Skor SDQ
-            SdqScore::create([
-                'user_id'        => $user->id,
-                'e_score'        => $row['skor_gejala_emosional_e'] ?? 0,
-                'c_score'        => $row['skor_masalah_perilaku_c'] ?? 0,
-                'h_score'        => $row['skor_masalah_hiperaktifitas_h'] ?? 0,
-                'p_score'        => $row['skor_masalah_teman_sebaya_p'] ?? 0,
-                'pro_score'      => $row['total_skor_kekuatan'] ?? 0,
-                'skor_kesulitan' => $row['total_skor_kesulitan'] ?? 0,
-                'umur_saat_tes'  => $row['usia'] ?? $row['umur'] ?? 0,
-                'created_at'     => $tanggalTes,
-                'updated_at'     => $tanggalTes,
+            // Simpan skor SDQ ke tabel skor_sdqs
+            SkorSdq::create([
+                'siswa_id'            => $siswa->id,
+                'tanggal_pemeriksaan' => $tanggalTes,
+                'skor_e'              => $row['skor_gejala_emosional_e'] ?? 0,
+                'skor_c'              => $row['skor_masalah_perilaku_c'] ?? 0,
+                'skor_h'              => $row['skor_masalah_hiperaktifitas_h'] ?? 0,
+                'skor_p'              => $row['skor_masalah_teman_sebaya_p'] ?? 0,
+                'skor_pr'             => $row['total_skor_kekuatan'] ?? 0,
+                'skor_diff'           => $row['total_skor_kesulitan'] ?? 0,
             ]);
         }
     }

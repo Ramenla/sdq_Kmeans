@@ -15,8 +15,8 @@
                 @csrf
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="nb-label">Nomor <span class="text-red-500">*</span></label>
-                        <input type="text" name="nomor" class="nb-input" placeholder="Contoh: 12345" value="{{ old('nomor') }}" required>
+                        <label class="nb-label">No HP <span class="text-red-500">*</span></label>
+                        <input type="text" name="no_hp" class="nb-input" placeholder="Contoh: 0812345678" value="{{ old('no_hp') }}" required>
                     </div>
                     <div>
                         <label class="nb-label">Nama Lengkap <span class="text-red-500">*</span></label>
@@ -43,12 +43,12 @@
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="nb-label">Tanggal Lahir</label>
-                        <input type="date" name="tanggal_lahir" class="nb-input" value="{{ old('tanggal_lahir') }}">
+                        <label class="nb-label">Umur</label>
+                        <input type="number" name="umur" class="nb-input" value="{{ old('umur') }}">
                     </div>
                     <div>
-                        <label class="nb-label">Password <span class="text-red-500">*</span></label>
-                        <input type="password" name="password" class="nb-input" placeholder="Min. 6 karakter" required>
+                        <label class="nb-label">Tanggal Pemeriksaan</label>
+                        <input type="date" name="tanggal_pemeriksaan" class="nb-input" value="{{ old('tanggal_pemeriksaan') }}">
                     </div>
                 </div>
                 <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-2">
@@ -75,8 +75,8 @@
                 @method('PUT')
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="nb-label">Nomor <span class="text-red-500">*</span></label>
-                        <input type="text" name="nomor" id="edit-nomor" class="nb-input" required>
+                        <label class="nb-label">No HP <span class="text-red-500">*</span></label>
+                        <input type="text" name="no_hp" id="edit-no_hp" class="nb-input" required>
                     </div>
                     <div>
                         <label class="nb-label">Nama Lengkap <span class="text-red-500">*</span></label>
@@ -101,9 +101,15 @@
                         </select>
                     </div>
                 </div>
-                <div>
-                    <label class="nb-label">Tanggal Lahir</label>
-                    <input type="date" name="tanggal_lahir" id="edit-tgl" class="nb-input">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="nb-label">Umur</label>
+                        <input type="number" name="umur" id="edit-umur" class="nb-input">
+                    </div>
+                    <div>
+                        <label class="nb-label">Tanggal Pemeriksaan</label>
+                        <input type="date" name="tanggal_pemeriksaan" id="edit-tgl" class="nb-input">
+                    </div>
                 </div>
                 <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-2">
                     <button type="button" onclick="closeModal('modal-edit')" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors border border-gray-200">Batal</button>
@@ -154,6 +160,9 @@
                         <button type="submit" class="bg-[#0066FF] text-white px-5 py-2 text-sm font-semibold hover:bg-blue-700 transition-colors">Cari</button>
                     </div>
                     <div class="flex items-center gap-3">
+                        <button type="button" onclick="if(confirm('Yakin ingin menghapus data terpilih?')) document.getElementById('bulk-delete-form').submit();" id="btn-hapus-terpilih" class="hidden items-center px-4 py-2 bg-white border border-red-500 text-red-500 text-sm font-semibold rounded-lg hover:bg-red-50 transition-all shadow-sm">
+                            <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Hapus Terpilih (<span id="count-terpilih">0</span>)
+                        </button>
                         <button type="button" onclick="openModal('modal-import')" class="flex items-center px-4 py-2 bg-white border border-[#0066FF] text-[#0066FF] text-sm font-semibold rounded-lg hover:bg-blue-50 transition-all shadow-sm">
                             <i data-lucide="download" class="w-4 h-4 mr-2"></i> Import data
                         </button>
@@ -221,11 +230,17 @@
                 </div>
             </form>
 
+            <form id="bulk-delete-form" action="{{ route('siswa.bulkDestroy') }}" method="POST">
+                @csrf
+                @method('DELETE')
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="table-container overflow-x-auto">
                     <table class="w-full text-left border-collapse min-w-[1200px]">
                         <thead>
                             <tr class="bg-gray-50/50 border-b border-gray-100 text-[11px] text-gray-400 font-bold uppercase tracking-widest">
+                                <th class="px-4 py-4 text-center">
+                                    <input type="checkbox" id="check-all" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" onclick="toggleAllCheckboxes(this)">
+                                </th>
                                 <th class="px-4 py-4 text-center">No.</th>
                                 <th class="px-6 py-4">
                                     <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'nama_siswa', 'order' => (request('sort_by') === 'nama_siswa' && request('order') === 'asc') ? 'desc' : 'asc']) }}" class="inline-flex items-center gap-1 hover:text-[#0066FF] transition-colors cursor-pointer normal-case">
@@ -337,26 +352,33 @@
                         <tbody class="text-sm text-gray-600 divide-y divide-gray-50">
                             @forelse ($dataSiswa as $data)
                                 <tr class="hover:bg-blue-50/20 transition-colors">
-                                    <td class="px-4 py-4 text-center font-medium text-gray-400">{{ $loop->iteration + $dataSiswa->firstItem() - 1 }}</td>
-                                    <td class="px-6 py-4 font-semibold text-gray-800">{{ $data->user->name ?: '-' }}</td>
-                                    <td class="px-4 py-4 text-center">{{ $data->user->kelas ?? '-' }}</td>
-                                    <td class="px-4 py-4 text-center font-medium text-gray-700">{{ $data->user->jenis_kelamin ?? '-' }}</td>
-                                    <td class="px-4 py-4 text-center">{{ $data->umur_saat_tes }}</td>
-                                    <td class="px-4 py-4 text-center">{{ $data->user->email ?? '-' }}</td>
-                                    <td class="px-4 py-4 text-center">{{ $data->user->no_hp ?? '-' }}</td>
-                                    <td class="px-6 py-4 text-center">{{ $data->created_at ? $data->created_at->format('d M Y') : '-' }}</td>
-                                    <td class="px-3 py-4 text-center">{{ $data->e_score }}</td>
-                                    <td class="px-3 py-4 text-center">{{ $data->c_score }}</td>
-                                    <td class="px-3 py-4 text-center">{{ $data->h_score }}</td>
-                                    <td class="px-3 py-4 text-center">{{ $data->p_score }}</td>
-                                    <td class="px-4 py-4 text-center font-bold text-gray-900 bg-blue-50/30 text-base">{{ $data->skor_kesulitan }}</td>
-                                    <td class="px-3 py-4 text-center italic">{{ $data->pro_score }}</td>
+                                    <td class="px-4 py-4 text-center">
+                                        <input type="checkbox" name="ids[]" value="{{ $data->id }}" class="row-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" onchange="updateBulkDeleteButton()">
+                                    </td>
+                                    <td class="px-4 py-4 text-center font-medium text-gray-400">{{ $loop->iteration }}</td>
+                                    <td class="px-6 py-4 font-semibold text-gray-800">{{ $data->nama_siswa ?: '-' }}</td>
+                                    <td class="px-4 py-4 text-center">{{ $data->kelas ?? '-' }}</td>
+                                    <td class="px-4 py-4 text-center font-medium text-gray-700">{{ $data->jenis_kelamin ?? '-' }}</td>
+                                    <td class="px-4 py-4 text-center">{{ $data->umur }}</td>
+                                    <td class="px-4 py-4 text-center">{{ $data->email ?? '-' }}</td>
+                                    <td class="px-4 py-4 text-center">{{ $data->no_hp ?? '-' }}</td>
+                                    
+                                    @php
+                                        $skor = $data->skorSdq->first();
+                                    @endphp
+                                    
+                                    <td class="px-6 py-4 text-center">{{ $skor && $skor->tanggal_pemeriksaan ? \Carbon\Carbon::parse($skor->tanggal_pemeriksaan)->format('d M Y') : '-' }}</td>
+                                    <td class="px-3 py-4 text-center">{{ $skor->skor_e ?? '-' }}</td>
+                                    <td class="px-3 py-4 text-center">{{ $skor->skor_c ?? '-' }}</td>
+                                    <td class="px-3 py-4 text-center">{{ $skor->skor_h ?? '-' }}</td>
+                                    <td class="px-3 py-4 text-center">{{ $skor->skor_p ?? '-' }}</td>
+                                    <td class="px-4 py-4 text-center font-bold text-gray-900 bg-blue-50/30 text-base">{{ $skor->skor_diff ?? '-' }}</td>
+                                    <td class="px-3 py-4 text-center italic">{{ $skor->skor_pr ?? '-' }}</td>
                                     <td class="px-4 py-4">
                                         <div class="flex justify-center items-center gap-2">
                                             {{-- Tombol Edit --}}
-                                            @if($data->user)
                                             <button type="button"
-                                                onclick="openEditModal({{ $data->user->id }}, '{{ addslashes($data->user->nomor ?? '') }}', '{{ addslashes($data->user->name ?? '') }}', '{{ addslashes($data->user->email ?? '') }}', '{{ addslashes($data->user->kelas ?? '') }}', '{{ $data->user->jenis_kelamin ?? '' }}', '{{ $data->user->tanggal_lahir ?? '' }}')"
+                                                onclick="openEditModal({{ $data->id }}, '{{ addslashes($data->no_hp ?? '') }}', '{{ addslashes($data->nama_siswa ?? '') }}', '{{ addslashes($data->email ?? '') }}', '{{ addslashes($data->kelas ?? '') }}', '{{ $data->jenis_kelamin ?? '' }}', '{{ $data->umur ?? '' }}', '{{ $skor->tanggal_pemeriksaan ?? '' }}')"
                                                 class="bg-amber-400 hover:bg-amber-500 text-gray-800 font-medium px-3 py-1.5 rounded-md shadow-sm transition-colors duration-200 flex items-center gap-1 text-sm"
                                                 title="Edit Data">
                                                 <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
@@ -364,8 +386,8 @@
                                             </button>
 
                                             {{-- Tombol Hapus --}}
-                                            <form action="{{ route('siswa.destroy', $data->user->id) }}" method="POST" 
-                                                  onsubmit="return confirm('Yakin ingin menghapus data siswa {{ addslashes($data->user->name ?? '') }}?');" 
+                                            <form action="{{ route('siswa.destroy', $data->id) }}" method="POST" 
+                                                  onsubmit="return confirm('Yakin ingin menghapus data siswa {{ addslashes($data->nama_siswa ?? '') }}?');" 
                                                   class="inline">
                                                 @csrf
                                                 @method('DELETE')
@@ -376,13 +398,12 @@
                                                     Hapus
                                                 </button>
                                             </form>
-                                            @endif
                                         </div>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="13" class="px-6 py-10 text-center text-gray-400 italic">Belum ada data kuesioner siswa.</td>
+                                    <td colspan="14" class="px-6 py-10 text-center text-gray-400 italic">Belum ada data kuesioner siswa.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -398,6 +419,7 @@
                     </div>
                 </div>
             </div>
+            </form>
 
 @endsection
 
@@ -414,14 +436,15 @@
         document.body.style.overflow = '';
     }
 
-    function openEditModal(userId, nomor, name, email, kelas, jk, tglLahir) {
+    function openEditModal(userId, noHp, name, email, kelas, jk, umur, tglPemeriksaan) {
         document.getElementById('form-edit').action = '/siswa/' + userId;
-        document.getElementById('edit-nomor').value = nomor;
+        document.getElementById('edit-no_hp').value = noHp;
         document.getElementById('edit-name').value = name;
         document.getElementById('edit-email').value = email;
         document.getElementById('edit-kelas').value = kelas;
         document.getElementById('edit-jk').value = jk;
-        document.getElementById('edit-tgl').value = tglLahir;
+        document.getElementById('edit-umur').value = umur;
+        document.getElementById('edit-tgl').value = tglPemeriksaan;
         openModal('modal-edit');
     }
 
@@ -448,5 +471,38 @@
     @elseif($errors->any() && !old('_method'))
         openModal('modal-tambah');
     @endif
+
+    // ===== BULK DELETE FUNCTIONS =====
+    function toggleAllCheckboxes(source) {
+        checkboxes = document.querySelectorAll('.row-checkbox');
+        for(var i=0, n=checkboxes.length;i<n;i++) {
+            checkboxes[i].checked = source.checked;
+        }
+        updateBulkDeleteButton();
+    }
+
+    function updateBulkDeleteButton() {
+        var checkedCount = document.querySelectorAll('.row-checkbox:checked').length;
+        var btn = document.getElementById('btn-hapus-terpilih');
+        var countSpan = document.getElementById('count-terpilih');
+        
+        if (checkedCount > 0) {
+            btn.classList.remove('hidden');
+            btn.classList.add('flex');
+            countSpan.innerText = checkedCount;
+        } else {
+            btn.classList.add('hidden');
+            btn.classList.remove('flex');
+        }
+        
+        // Update master checkbox
+        var allCheckboxes = document.querySelectorAll('.row-checkbox');
+        var masterCheckbox = document.getElementById('check-all');
+        if(allCheckboxes.length > 0 && checkedCount === allCheckboxes.length) {
+            masterCheckbox.checked = true;
+        } else if (masterCheckbox) {
+            masterCheckbox.checked = false;
+        }
+    }
 </script>
 @endpush

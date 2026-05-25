@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SdqScore;
-use App\Models\User;
+use App\Models\Siswa;
+use App\Models\SkorSdq;
 use App\Models\ClusteringHistory;
 use App\Models\ClusterResult;
 use Illuminate\Http\Request;
@@ -21,47 +21,41 @@ class KMeansController extends Controller
     private string $pythonBaseUrl = 'http://127.0.0.1:5000';
 
     /**
-     * Helper to build filtered query for SdqScore.
+     * Helper to build filtered query for Siswa.
      */
-    private function buildSdqScoreQuery(Request $request)
+    private function buildSiswaQuery(Request $request)
     {
-        $query = SdqScore::with('user');
+        $query = Siswa::with('skorSdq');
 
         // Filter: Pencarian nama / NIS siswa
         $query->when($request->filled('search'), function ($q) use ($request) {
             $search = $request->query('search');
-            $q->whereHas('user', function ($uq) use ($search) {
-                $uq->where('name', 'like', '%' . $search . '%')
+            $q->where(function ($uq) use ($search) {
+                $uq->where('nama_siswa', 'like', '%' . $search . '%')
                    ->orWhere('nomor', 'like', '%' . $search . '%');
             });
         });
 
         // Filter: Kelas
         $query->when($request->filled('kelas'), function ($q) use ($request) {
-            $kelas = $request->query('kelas');
-            $q->whereHas('user', function ($uq) use ($kelas) {
-                $uq->where('kelas', $kelas);
-            });
+            $q->where('kelas', $request->query('kelas'));
         });
 
         // Filter: Jenis Kelamin
         $query->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
-            $jk = $request->query('jenis_kelamin');
-            $q->whereHas('user', function ($uq) use ($jk) {
-                $uq->where('jenis_kelamin', $jk);
-            });
+            $q->where('jenis_kelamin', $request->query('jenis_kelamin'));
         });
 
         // Filter: Umur
         $query->when($request->filled('umur'), function ($q) use ($request) {
-            $umur = $request->query('umur');
-            $q->where('umur_saat_tes', $umur);
+            $q->where('umur', $request->query('umur'));
         });
 
         // Filter: Tanggal Screening (Exact Date Match)
         $query->when($request->filled('date'), function ($q) use ($request) {
-            $date = $request->query('date');
-            $q->whereDate('sdq_scores.created_at', $date);
+            $q->whereHas('skorSdq', function ($sq) use ($request) {
+                $sq->whereDate('tanggal_pemeriksaan', $request->query('date'));
+            });
         });
 
         // Sorting Kolom
@@ -69,20 +63,17 @@ class KMeansController extends Controller
         $order = strtolower($request->query('order')) === 'desc' ? 'desc' : 'asc';
 
         if ($sortBy === 'id_siswa' || $sortBy === 'nomor') {
-            $query->join('users', 'sdq_scores.user_id', '=', 'users.id')
-                  ->select('sdq_scores.*')
-                  ->orderBy('users.nomor', $order);
+            $query->orderBy('no_hp', $order);
         } elseif ($sortBy === 'nama_siswa') {
-            $query->join('users', 'sdq_scores.user_id', '=', 'users.id')
-                  ->select('sdq_scores.*')
-                  ->orderBy('users.name', $order);
-        } elseif ($sortBy === 'diff') {
-            $query->orderBy('sdq_scores.skor_kesulitan', $order);
-        } elseif (in_array($sortBy, ['e_score', 'c_score', 'h_score', 'p_score', 'pro_score'])) {
-            $query->orderBy('sdq_scores.' . $sortBy, $order);
+            $query->orderBy('nama_siswa', $order);
+        } elseif (in_array($sortBy, ['skor_diff', 'skor_e', 'skor_c', 'skor_h', 'skor_p', 'skor_pr'])) {
+            // Kita join untuk sorting, tapi pastikan select('siswas.*') agar hasil paginasi tetap model Siswa
+            $query->join('skor_sdqs', 'siswas.id', '=', 'skor_sdqs.siswa_id')
+                  ->select('siswas.*')
+                  ->orderBy('skor_sdqs.' . $sortBy, $order);
         } else {
             // Default sorting: Terbaru (created_at desc)
-            $query->orderBy('sdq_scores.created_at', 'desc');
+            $query->orderBy('created_at', 'desc');
         }
 
         return $query;
@@ -101,31 +92,30 @@ class KMeansController extends Controller
      */
     private function getRawSdqData(Request $request)
     {
-        $query = SdqScore::with('user');
+        // Menggunakan SkorSdq untuk ML agar bisa per riwayat tes
+        $query = SkorSdq::with('siswa');
 
-        // Terapkan filter demografi yang sama persis
+        // Terapkan filter demografi melalui relasi
         $query->when($request->filled('kelas'), function ($q) use ($request) {
-            $kelas = $request->query('kelas');
-            $q->whereHas('user', function ($uq) use ($kelas) {
-                $uq->where('kelas', $kelas);
+            $q->whereHas('siswa', function ($sq) use ($request) {
+                $sq->where('kelas', $request->query('kelas'));
             });
         });
 
         $query->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
-            $jk = $request->query('jenis_kelamin');
-            $q->whereHas('user', function ($uq) use ($jk) {
-                $uq->where('jenis_kelamin', $jk);
+            $q->whereHas('siswa', function ($sq) use ($request) {
+                $sq->where('jenis_kelamin', $request->query('jenis_kelamin'));
             });
         });
 
         $query->when($request->filled('umur'), function ($q) use ($request) {
-            $umur = $request->query('umur');
-            $q->where('umur_saat_tes', $umur);
+            $q->whereHas('siswa', function ($sq) use ($request) {
+                $sq->where('umur', $request->query('umur'));
+            });
         });
 
         $query->when($request->filled('date'), function ($q) use ($request) {
-            $date = $request->query('date');
-            $q->whereDate('sdq_scores.created_at', $date);
+            $q->whereDate('tanggal_pemeriksaan', $request->query('date'));
         });
 
         return $query->get();
@@ -147,15 +137,16 @@ class KMeansController extends Controller
         $hasAnyCheckbox = $request->hasAny(['cb_e', 'cb_c', 'cb_h', 'cb_p', 'cb_diff', 'cb_pr']);
 
         if (!$hasAnyCheckbox) {
-            return ['e_score', 'c_score', 'h_score', 'p_score', 'pro_score'];
+            return ['skor_e', 'skor_c', 'skor_h', 'skor_p', 'skor_pr'];
         }
 
-        if ($request->query('cb_e') == '1')    $columns[] = 'e_score';
-        if ($request->query('cb_c') == '1')    $columns[] = 'c_score';
-        if ($request->query('cb_h') == '1')    $columns[] = 'h_score';
-        if ($request->query('cb_p') == '1')    $columns[] = 'p_score';
-        if ($request->query('cb_pr') == '1')   $columns[] = 'pro_score';
-        if ($request->query('cb_diff') == '1') $columns[] = 'skor_kesulitan';
+        // Jika ada parameter, cek satu-satu (Checkbox akan bernilai '1' jika dicentang)
+        if ($request->query('cb_e') == '1')    $columns[] = 'skor_e';
+        if ($request->query('cb_c') == '1')    $columns[] = 'skor_c';
+        if ($request->query('cb_h') == '1')    $columns[] = 'skor_h';
+        if ($request->query('cb_p') == '1')    $columns[] = 'skor_p';
+        if ($request->query('cb_pr') == '1')   $columns[] = 'skor_pr';
+        if ($request->query('cb_diff') == '1') $columns[] = 'skor_diff';
 
         return $columns;
     }
@@ -194,29 +185,28 @@ class KMeansController extends Controller
             $perPage = 10;
         }
 
-        $dataSiswa = $this->buildSdqScoreQuery($request)->paginate($perPage);
+        $dataSiswa = $this->buildSiswaQuery($request)->paginate($perPage);
 
         // Ambil data filter untuk dropdown dinamis agar selalu sinkron dengan DB riil
-        $listKelas = User::whereNotNull('kelas')
+        $listKelas = Siswa::whereNotNull('kelas')
             ->where('kelas', '!=', '')
-            ->where('role', 'siswa')
             ->distinct()
             ->orderBy('kelas')
             ->pluck('kelas');
 
-        $listUmur = SdqScore::distinct()
-            ->orderBy('umur_saat_tes')
-            ->pluck('umur_saat_tes');
+        $listUmur = Siswa::distinct()
+            ->orderBy('umur')
+            ->pluck('umur');
 
         // Mengambil daftar tanggal pemeriksaan yang unik untuk filter dropdown
-        $daftarTanggal = SdqScore::selectRaw('DATE(created_at) as tanggal_pemeriksaan')
+        $daftarTanggal = SkorSdq::selectRaw('DATE(tanggal_pemeriksaan) as tanggal_pemeriksaan')
             ->distinct()
-            ->whereNotNull('created_at')
+            ->whereNotNull('tanggal_pemeriksaan')
             ->orderBy('tanggal_pemeriksaan', 'desc')
             ->pluck('tanggal_pemeriksaan');
 
         // Ambil semua data user siswa untuk keperluan CRUD (Edit/Hapus)
-        $listSiswa = User::where('role', 'siswa')->orderBy('name')->get();
+        $listSiswa = Siswa::orderBy('nama_siswa')->get();
 
         return view('admin.data-siswa', compact('dataSiswa', 'listKelas', 'listUmur', 'daftarTanggal', 'listSiswa'));
     }
@@ -233,7 +223,7 @@ class KMeansController extends Controller
         // Hanya query data jika user sudah klik "Load Data Siswa"
         $loaded = $request->has('load');
         $dataSiswa = $loaded
-            ? $this->buildSdqScoreQuery($request)->paginate(5)
+            ? $this->buildSiswaQuery($request)->paginate(5)
             : null;
 
         // Tentukan kolom aktif berdasarkan checkbox
@@ -243,20 +233,19 @@ class KMeansController extends Controller
         $showDiff = $request->query('cb_diff') == '1';
 
         // Ambil data filter untuk dropdown dinamis
-        $listKelas = User::whereNotNull('kelas')
+        $listKelas = Siswa::whereNotNull('kelas')
             ->where('kelas', '!=', '')
-            ->where('role', 'siswa')
             ->distinct()
             ->orderBy('kelas')
             ->pluck('kelas');
 
-        $listUmur = SdqScore::distinct()
-            ->orderBy('umur_saat_tes')
-            ->pluck('umur_saat_tes');
+        $listUmur = Siswa::distinct()
+            ->orderBy('umur')
+            ->pluck('umur');
 
-        $daftarTanggal = SdqScore::selectRaw('DATE(created_at) as tanggal_pemeriksaan')
+        $daftarTanggal = Siswa::selectRaw('DATE(tanggal_pemeriksaan) as tanggal_pemeriksaan')
             ->distinct()
-            ->whereNotNull('created_at')
+            ->whereNotNull('tanggal_pemeriksaan')
             ->orderBy('tanggal_pemeriksaan', 'desc')
             ->pluck('tanggal_pemeriksaan');
 
@@ -311,9 +300,8 @@ class KMeansController extends Controller
                 $merged = $rawData->values()->map(function ($item, $index) use ($scaledData, $activeColumns) {
                     $row = [
                         'id'      => $item->id,
-                        'user_id' => $item->user_id,
-                        'nis'     => $item->user->nis ?? '-',
-                        'nama'    => $item->user->name ?? '-',
+                        'no_hp'   => $item->siswa->no_hp ?? '-',
+                        'nama'    => $item->siswa->nama_siswa ?? '-',
                     ];
                     foreach ($activeColumns as $col) {
                         $row[$col . '_zscore'] = $scaledData[$index][$col] ?? null;
@@ -493,18 +481,18 @@ class KMeansController extends Controller
                 // Gabungkan label klaster + koordinat PCA + profil siswa
                 $hasilKlaster = $rawData->values()->map(function ($item, $index) use ($labels, $pcaX, $pcaY) {
                     return [
-                        'sdq_score_id'   => $item->id,
-                        'user_id'        => $item->user_id,
-                        'nis'            => $item->user->nis ?? '-',
-                        'nama'           => $item->user->name ?? '-',
-                        'kelas'          => $item->user->kelas ?? '-',
-                        'jenis_kelamin'  => $item->user->jenis_kelamin ?? '-',
-                        'e_score'        => $item->e_score,
-                        'c_score'        => $item->c_score,
-                        'h_score'        => $item->h_score,
-                        'p_score'        => $item->p_score,
-                        'skor_kesulitan' => $item->skor_kesulitan,
-                        'pro_score'      => $item->pro_score,
+                        'skor_sdq_id'    => $item->id,
+                        'siswa_id'       => $item->siswa_id,
+                        'no_hp'          => $item->siswa->no_hp ?? '-',
+                        'nama'           => $item->siswa->nama_siswa ?? '-',
+                        'kelas'          => $item->siswa->kelas ?? '-',
+                        'jenis_kelamin'  => $item->siswa->jenis_kelamin ?? '-',
+                        'skor_e'         => $item->skor_e,
+                        'skor_c'         => $item->skor_c,
+                        'skor_h'         => $item->skor_h,
+                        'skor_p'         => $item->skor_p,
+                        'skor_diff'      => $item->skor_diff,
+                        'skor_pr'        => $item->skor_pr,
                         'cluster_number' => $labels[$index] ?? null,
                         'pca_x'          => $pcaX[$index] ?? 0,
                         'pca_y'          => $pcaY[$index] ?? 0,
@@ -532,12 +520,11 @@ class KMeansController extends Controller
                     'filter_jk'       => $request->input('filter_jk'),
                 ]);
 
-                // Simpan detail hasil per siswa
+                // Simpan detail hasil per skor
                 foreach ($hasilKlaster as $item) {
                     ClusterResult::create([
                         'clustering_history_id' => $history->id,
-                        'user_id'               => $item['user_id'],
-                        'sdq_score_id'          => $item['sdq_score_id'],
+                        'skor_sdq_id'           => $item['skor_sdq_id'],
                         'cluster_number'        => $item['cluster_number'],
                     ]);
                 }

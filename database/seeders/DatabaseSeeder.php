@@ -12,18 +12,9 @@ class DatabaseSeeder extends Seeder
     {
         // 1. Buat Akun Khusus Guru BK (Sesuai role baru Anda)
         User::create([
-            'nis' => null,
             'name' => 'Fauzan (Guru BK)',
             'email' => 'admin@sekolah.com',
             'password' => bcrypt('admin123'), // Password untuk login nanti
-            'role' => 'guru_bk', 
         ]);
-
-        // 2. Generate 300 Data Siswa dan 1 riwayat SDQ untuk setiap siswanya
-        User::factory(300)->create()->each(function ($siswa) {
-            SdqScore::factory()->create([
-                'user_id' => $siswa->id, 
-            ]);
-        });
     }
 }

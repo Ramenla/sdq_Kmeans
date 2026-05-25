@@ -31,7 +31,7 @@ app = Flask(__name__)
 # ---------------------------------------------------------------
 # Kolom subskala SDQ yang digunakan untuk komputasi ML
 # ---------------------------------------------------------------
-FEATURE_COLUMNS = ['e_score', 'c_score', 'h_score', 'p_score', 'pro_score', 'skor_kesulitan']
+FEATURE_COLUMNS = ['skor_e', 'skor_c', 'skor_h', 'skor_p', 'skor_pr', 'skor_diff']
 
 
 def _validate_and_extract(payload):
