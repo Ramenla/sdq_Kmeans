@@ -191,7 +191,7 @@
                             <select name="date" onchange="this.form.submit()" class="px-4 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 text-gray-600 shadow-sm">
                                 <option value="">Semua</option>
                                 @foreach($daftarTanggal as $tgl)
-                                    <option value="{{ $tgl }}" {{ request('date') == $tgl ? 'selected' : '' }}>{{ \Carbon\Carbon::parse($tgl)->format('d M Y') }}</option>
+                                    <option value="{{ $tgl }}" {{ request('date') == $tgl ? 'selected' : '' }}>{{ \Carbon\Carbon::parse($tgl)->isoFormat('D MMMM YYYY') }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -241,7 +241,7 @@
                                 <th class="px-4 py-4 text-center">
                                     <input type="checkbox" id="check-all" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" onclick="toggleAllCheckboxes(this)">
                                 </th>
-                                <th class="px-4 py-4 text-center">No.</th>
+                                <th class="px-4 py-4 text-center">ID Siswa</th>
                                 <th class="px-6 py-4">
                                     <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'nama_siswa', 'order' => (request('sort_by') === 'nama_siswa' && request('order') === 'asc') ? 'desc' : 'asc']) }}" class="inline-flex items-center gap-1 hover:text-[#0066FF] transition-colors cursor-pointer normal-case">
                                         <span>Nama Siswa</span>
@@ -355,7 +355,7 @@
                                     <td class="px-4 py-4 text-center">
                                         <input type="checkbox" name="ids[]" value="{{ $data->id }}" class="row-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" onchange="updateBulkDeleteButton()">
                                     </td>
-                                    <td class="px-4 py-4 text-center font-medium text-gray-400">{{ $loop->iteration }}</td>
+                                    <td class="px-4 py-4 text-center font-medium text-gray-400">{{ $data->id }}</td>
                                     <td class="px-6 py-4 font-semibold text-gray-800">{{ $data->nama_siswa ?: '-' }}</td>
                                     <td class="px-4 py-4 text-center">{{ $data->kelas ?? '-' }}</td>
                                     <td class="px-4 py-4 text-center font-medium text-gray-700">{{ $data->jenis_kelamin ?? '-' }}</td>
@@ -367,7 +367,7 @@
                                         $skor = $data->skorSdq->first();
                                     @endphp
                                     
-                                    <td class="px-6 py-4 text-center">{{ $skor && $skor->tanggal_pemeriksaan ? \Carbon\Carbon::parse($skor->tanggal_pemeriksaan)->format('d M Y') : '-' }}</td>
+                                    <td class="px-6 py-4 text-center">{{ $skor && $skor->tanggal_pemeriksaan ? \Carbon\Carbon::parse($skor->tanggal_pemeriksaan)->isoFormat('dddd, D MMMM YYYY') : '-' }}</td>
                                     <td class="px-3 py-4 text-center">{{ $skor->skor_e ?? '-' }}</td>
                                     <td class="px-3 py-4 text-center">{{ $skor->skor_c ?? '-' }}</td>
                                     <td class="px-3 py-4 text-center">{{ $skor->skor_h ?? '-' }}</td>

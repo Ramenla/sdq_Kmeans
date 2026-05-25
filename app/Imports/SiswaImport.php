@@ -31,13 +31,29 @@ class SiswaImport implements ToCollection, WithHeadingRow
             
             // Format Tanggal Pemeriksaan
             $rawDate = $row['tanggal_pemeriksaan'] ?? $row['tanggal'] ?? $row['waktu'] ?? $row['waktu_pengisian'] ?? $row['timestamp'] ?? null;
+
             $tanggalTes = null;
             if (!empty($rawDate)) {
                 try {
                     if (is_numeric($rawDate)) {
                         $tanggalTes = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($rawDate)->format('Y-m-d');
                     } else {
-                        $tanggalTes = Carbon::parse($rawDate)->format('Y-m-d');
+                        // Terjemahkan nama bulan Indonesia ke Inggris
+                        $indoMonths = [
+                            'Januari' => 'January', 'Februari' => 'February', 'Maret' => 'March',
+                            'April' => 'April', 'Mei' => 'May', 'Juni' => 'June', 'Juli' => 'July',
+                            'Agustus' => 'August', 'September' => 'September', 'Oktober' => 'October',
+                            'November' => 'November', 'Desember' => 'December'
+                        ];
+                        $translatedDate = str_ireplace(array_keys($indoMonths), array_values($indoMonths), $rawDate);
+                        
+                        // Buang nama hari jika ada (contoh: "Senin, 16 December 2024" -> "16 December 2024")
+                        if (strpos($translatedDate, ',') !== false) {
+                            $parts = explode(',', $translatedDate);
+                            $translatedDate = trim(end($parts));
+                        }
+                        
+                        $tanggalTes = Carbon::parse($translatedDate)->format('Y-m-d');
                     }
                 } catch (\Throwable $e) {
                     $tanggalTes = now()->format('Y-m-d');

@@ -49,17 +49,17 @@
                                         <th class="px-3 py-3 text-center">Kelas</th>
                                         <th class="px-2 py-3 text-center">JK</th>
                                         <th class="px-2 py-3 text-center">Umur</th>
-                                        <th class="px-4 py-3 text-center">Screening</th>
-                                        @if(in_array('e_score', $activeColumns))
+                                        <th class="px-4 py-3 text-center">Tanggal Pemeriksaan</th>
+                                        @if(in_array('skor_e', $activeColumns))
                                             <th class="px-2 py-3 text-center">E</th>
                                         @endif
-                                        @if(in_array('c_score', $activeColumns))
+                                        @if(in_array('skor_c', $activeColumns))
                                             <th class="px-2 py-3 text-center">C</th>
                                         @endif
-                                        @if(in_array('h_score', $activeColumns))
+                                        @if(in_array('skor_h', $activeColumns))
                                             <th class="px-2 py-3 text-center">H</th>
                                         @endif
-                                        @if(in_array('p_score', $activeColumns))
+                                        @if(in_array('skor_p', $activeColumns))
                                             <th class="px-2 py-3 text-center">P</th>
                                         @endif
                                         @if($showDiff)
@@ -78,37 +78,40 @@
                                                 </a>
                                             </th>
                                         @endif
-                                        @if(in_array('pro_score', $activeColumns))
+                                        @if(in_array('skor_pr', $activeColumns))
                                             <th class="px-2 py-3 text-center">Pr</th>
                                         @endif
                                     </tr>
                                 </thead>
                                 <tbody class="text-gray-600 divide-y divide-gray-50">
                                     @forelse ($dataSiswa as $data)
+                                        @php
+                                            $skor = $data->skorSdq->first();
+                                        @endphp
                                         <tr class="hover:bg-gray-50/50 transition-colors">
-                                            <td class="px-4 py-3 font-medium text-gray-400">{{ $data->user->nis ?? '-' }}</td>
-                                            <td class="px-4 py-3 font-semibold text-gray-800">{{ $data->user->name ?? '-' }}</td>
-                                            <td class="px-3 py-3 text-center">{{ $data->user->kelas ?? '-' }}</td>
-                                            <td class="px-2 py-3 text-center">{{ $data->user->jenis_kelamin ?? '-' }}</td>
-                                            <td class="px-2 py-3 text-center">{{ $data->umur_saat_tes }}</td>
-                                            <td class="px-4 py-3 text-center">{{ $data->created_at ? $data->created_at->format('d M Y') : '-' }}</td>
-                                            @if(in_array('e_score', $activeColumns))
-                                                <td class="px-2 py-3 text-center">{{ $data->e_score }}</td>
+                                            <td class="px-4 py-3 font-medium text-gray-400">{{ $data->id }}</td>
+                                            <td class="px-4 py-3 font-semibold text-gray-800">{{ $data->nama_siswa ?? '-' }}</td>
+                                            <td class="px-3 py-3 text-center">{{ $data->kelas ?? '-' }}</td>
+                                            <td class="px-2 py-3 text-center">{{ $data->jenis_kelamin ?? '-' }}</td>
+                                            <td class="px-2 py-3 text-center">{{ $data->umur }}</td>
+                                            <td class="px-4 py-3 text-center">{{ $skor && $skor->tanggal_pemeriksaan ? \Carbon\Carbon::parse($skor->tanggal_pemeriksaan)->isoFormat('dddd, D MMMM YYYY') : '-' }}</td>
+                                            @if(in_array('skor_e', $activeColumns))
+                                                <td class="px-2 py-3 text-center">{{ $skor->skor_e ?? '-' }}</td>
                                             @endif
-                                            @if(in_array('c_score', $activeColumns))
-                                                <td class="px-2 py-3 text-center">{{ $data->c_score }}</td>
+                                            @if(in_array('skor_c', $activeColumns))
+                                                <td class="px-2 py-3 text-center">{{ $skor->skor_c ?? '-' }}</td>
                                             @endif
-                                            @if(in_array('h_score', $activeColumns))
-                                                <td class="px-2 py-3 text-center">{{ $data->h_score }}</td>
+                                            @if(in_array('skor_h', $activeColumns))
+                                                <td class="px-2 py-3 text-center">{{ $skor->skor_h ?? '-' }}</td>
                                             @endif
-                                            @if(in_array('p_score', $activeColumns))
-                                                <td class="px-2 py-3 text-center">{{ $data->p_score }}</td>
+                                            @if(in_array('skor_p', $activeColumns))
+                                                <td class="px-2 py-3 text-center">{{ $skor->skor_p ?? '-' }}</td>
                                             @endif
                                             @if($showDiff)
-                                                <td class="px-3 py-3 text-center font-bold text-gray-900 bg-blue-50/20">{{ $data->skor_kesulitan }}</td>
+                                                <td class="px-3 py-3 text-center font-bold text-gray-900 bg-blue-50/20">{{ $skor->skor_diff ?? '-' }}</td>
                                             @endif
-                                            @if(in_array('pro_score', $activeColumns))
-                                                <td class="px-2 py-3 text-center italic">{{ $data->pro_score }}</td>
+                                            @if(in_array('skor_pr', $activeColumns))
+                                                <td class="px-2 py-3 text-center italic">{{ $skor->skor_pr ?? '-' }}</td>
                                             @endif
                                         </tr>
                                     @empty
@@ -181,7 +184,7 @@
                                             @endphp
                                             <tr class="hover:bg-gray-50/50 transition-colors">
                                                 <td class="px-4 py-3 font-sans font-medium text-gray-400">{{ $dataSiswa->firstItem() + $index }}</td>
-                                                <td class="px-4 py-3 font-sans font-medium text-gray-400">{{ $data->no_hp ?? '-' }}</td>
+                                                <td class="px-4 py-3 font-sans font-medium text-gray-400">{{ $data->id }}</td>
                                                 <td class="px-4 py-3 font-sans font-semibold text-gray-800">{{ $data->nama_siswa ?? '-' }}</td>
                                                 @if(in_array('skor_e', $activeColumns))
                                                     <td class="px-2 py-3 text-center">{{ $skor->skor_e ?? 0 }}</td>
@@ -313,8 +316,13 @@
                 </div>
 
                 <div class="space-y-1.5">
-                    <span class="text-xs font-semibold text-gray-500">Screening Terakhir</span>
-                    <input type="date" name="date" value="{{ request('date') }}" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 text-gray-600 shadow-sm">
+                    <span class="text-xs font-semibold text-gray-500">Tanggal Pemeriksaan</span>
+                    <select name="date" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 text-gray-600 shadow-sm">
+                        <option value="">Semua</option>
+                        @foreach($daftarTanggal as $tgl)
+                            <option value="{{ $tgl }}" {{ request('date') == $tgl ? 'selected' : '' }}>{{ \Carbon\Carbon::parse($tgl)->isoFormat('D MMMM YYYY') }}</option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div class="space-y-1.5">
@@ -430,7 +438,7 @@
                         result.scaled_data.forEach((item, index) => {
                             rows += `<tr class="hover:bg-gray-50/50 transition-colors">`;
                             rows += `<td class="px-4 py-3 font-sans font-medium text-gray-400">${index + 1}</td>`;
-                            rows += `<td class="px-4 py-3 font-sans font-medium text-gray-400">${item.nis}</td>`;
+                            rows += `<td class="px-4 py-3 font-sans font-medium text-gray-400">${item.id}</td>`;
                             rows += `<td class="px-4 py-3 font-sans font-semibold text-gray-800">${item.nama}</td>`;
                             cols.forEach(col => {
                                 const val = item[col + '_zscore'];

@@ -32,7 +32,7 @@ class KMeansController extends Controller
             $search = $request->query('search');
             $q->where(function ($uq) use ($search) {
                 $uq->where('nama_siswa', 'like', '%' . $search . '%')
-                   ->orWhere('nomor', 'like', '%' . $search . '%');
+                   ->orWhere('no_hp', 'like', '%' . $search . '%');
             });
         });
 
@@ -243,7 +243,7 @@ class KMeansController extends Controller
             ->orderBy('umur')
             ->pluck('umur');
 
-        $daftarTanggal = Siswa::selectRaw('DATE(tanggal_pemeriksaan) as tanggal_pemeriksaan')
+        $daftarTanggal = SkorSdq::selectRaw('DATE(tanggal_pemeriksaan) as tanggal_pemeriksaan')
             ->distinct()
             ->whereNotNull('tanggal_pemeriksaan')
             ->orderBy('tanggal_pemeriksaan', 'desc')
@@ -299,7 +299,7 @@ class KMeansController extends Controller
                 $scaledData = $result['scaled_data'] ?? [];
                 $merged = $rawData->values()->map(function ($item, $index) use ($scaledData, $activeColumns) {
                     $row = [
-                        'id'      => $item->id,
+                        'id'      => $item->siswa_id,
                         'no_hp'   => $item->siswa->no_hp ?? '-',
                         'nama'    => $item->siswa->nama_siswa ?? '-',
                     ];
