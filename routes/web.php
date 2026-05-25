@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\KMeansController;
+use App\Http\Controllers\SiswaController;
 
 // --- RUTE HALAMAN UTAMA (LANDING PAGE) ---
 Route::get('/', function () {
@@ -24,6 +25,12 @@ Route::get('/dashboard-siswa', function () { return "Selamat datang di Dashboard
 
 Route::get('/dashboard-guru', [KMeansController::class, 'indexDataSiswa'])->name('dashboard.guru');
 
+// --- RUTE CRUD DATA SISWA ---
+Route::post('/siswa', [SiswaController::class, 'store'])->name('siswa.store');
+Route::put('/siswa/{siswa}', [SiswaController::class, 'update'])->name('siswa.update');
+Route::delete('/siswa/{siswa}', [SiswaController::class, 'destroy'])->name('siswa.destroy');
+Route::post('/data-siswa/import', [SiswaController::class, 'import'])->name('siswa.import');
+
 Route::get('/admin/analisis-k', [KMeansController::class, 'indexAnalisis'])->name('admin.analisis');
 
 Route::get('/admin/klasterisasi', function () {
@@ -33,3 +40,8 @@ Route::get('/admin/klasterisasi', function () {
 Route::get('/admin/laporan-hasil', function () {
     return view('admin.laporan-hasil');
 })->name('admin.laporan');
+
+// --- RUTE API UNTUK KOMUNIKASI DENGAN SERVER PYTHON ML ---
+Route::get('/api/preprocess', [KMeansController::class, 'getPreprocessData'])->name('api.preprocess');
+Route::get('/api/elbow', [KMeansController::class, 'getElbowData'])->name('api.elbow');
+Route::post('/api/klasterisasi', [KMeansController::class, 'prosesKlasterisasi'])->name('api.klasterisasi');

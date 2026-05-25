@@ -19,8 +19,8 @@ class DatabaseSeeder extends Seeder
             'role' => 'guru_bk', 
         ]);
 
-        // 2. Generate 100 Data Siswa dan 1 riwayat SDQ untuk setiap siswanya
-        User::factory(100)->create()->each(function ($siswa) {
+        // 2. Generate 300 Data Siswa dan 1 riwayat SDQ untuk setiap siswanya
+        User::factory(300)->create()->each(function ($siswa) {
             SdqScore::factory()->create([
                 'user_id' => $siswa->id, 
             ]);

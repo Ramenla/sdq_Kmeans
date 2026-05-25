@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title', 'Dashboard Admin')</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style> 
+        body { font-family: 'Inter', sans-serif; background-color: #F4F7FF; }
+        .table-container::-webkit-scrollbar, .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+        .table-container::-webkit-scrollbar-thumb, .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+
+        /* ===== MINIMALIST FORM STYLES ===== */
+        .nb-input, .nb-select {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            background: #f9fafb;
+            padding: 0.625rem 0.875rem;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            outline: none;
+            width: 100%;
+            color: #374151;
+        }
+        .nb-input:focus, .nb-select:focus {
+            border-color: #3b82f6;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .nb-input::placeholder {
+            color: #9ca3af;
+        }
+        .nb-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1.25em 1.25em;
+            padding-right: 2.5rem;
+        }
+        .nb-label {
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: #374151;
+            margin-bottom: 0.375rem;
+            display: block;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            max-width: 540px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.2s ease;
+        }
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        /* Toast Notification */
+        .toast-notification {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 100;
+            border: 1px solid #f3f4f6;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 1rem 1.5rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            max-width: 400px;
+            background: #fff;
+            animation: slideInToast 0.3s ease forwards;
+        }
+        @keyframes slideInToast {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOutToast {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(120%); opacity: 0; }
+        }
+
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        
+        @stack('styles')
+    </style>
+</head>
+<body class="bg-[#F4F7FF] font-sans text-gray-900">
+
+    {{-- ===== TOAST NOTIFICATIONS ===== --}}
+    @if(session('success'))
+        <div id="toast-success" class="toast-notification bg-green-400 text-black">
+            <div class="flex items-center gap-2">
+                <i data-lucide="check-circle" class="w-5 h-5"></i>
+                <span>{{ session('success') }}</span>
+            </div>
+        </div>
+    @endif
+    @if($errors->any())
+        <div id="toast-error" class="toast-notification bg-red-400 text-white">
+            <div class="flex items-start gap-2">
+                <i data-lucide="alert-circle" class="w-5 h-5 mt-0.5 shrink-0"></i>
+                <div>
+                    @foreach($errors->all() as $error)
+                        <p>{{ $error }}</p>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @include('layouts.sidebar')
+
+    <div class="p-4 lg:ml-64 transition-all duration-300" id="main-content">
+        @include('layouts.header')
+        
+        <main class="pt-4 @yield('main_class')">
+            @yield('content')
+        </main>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Toast auto-dismiss globally if they exist
+        ['toast-success', 'toast-error'].forEach(function(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                setTimeout(function() {
+                    el.style.animation = 'slideOutToast 0.3s ease forwards';
+                    setTimeout(function() { el.remove(); }, 300);
+                }, 4000);
+            }
+        });
+
+        // Sidebar Toggle logic
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleBtn = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('logo-sidebar');
+            const mainContent = document.getElementById('main-content');
+            
+            if (sidebar && toggleBtn) {
+                toggleBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isDesktop = window.innerWidth >= 1024;
+                    
+                    if (isDesktop) {
+                        // Toggle untuk Desktop
+                        sidebar.classList.toggle('lg:translate-x-0');
+                        if (mainContent) mainContent.classList.toggle('lg:ml-64');
+                    } else {
+                        // Toggle untuk Mobile
+                        sidebar.classList.toggle('-translate-x-full');
+                    }
+                });
+            }
+        });
+    </script>
+    @stack('scripts')
+</body>
+</html>
