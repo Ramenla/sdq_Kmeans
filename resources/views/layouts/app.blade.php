@@ -144,10 +144,10 @@
 
     @include('layouts.sidebar')
 
-    <div class="p-4 lg:ml-64 transition-all duration-300" id="main-content">
+    <div class="lg:ml-64 transition-all duration-300 flex flex-col min-h-screen" id="main-content">
         @include('layouts.header')
         
-        <main class="pt-4 @yield('main_class')">
+        <main class="flex-1 p-6 @yield('main_class')">
             @yield('content')
         </main>
     </div>

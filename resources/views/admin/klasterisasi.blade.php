@@ -156,7 +156,7 @@
     {{-- ============================================================= --}}
     {{-- SIDEBAR: Informasi Filter (Kanan) --}}
     {{-- ============================================================= --}}
-    <div class="w-full lg:w-1/4 bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6 sticky top-20">
+    <div class="w-full lg:w-1/4 bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
         <div>
             <h3 class="text-gray-800 font-bold text-base tracking-tight">Filter dan Metriks</h3>
             <p class="text-xs text-gray-400 mt-1">Data dikunci berdasarkan hasil analisis sebelumnya.</p>
@@ -178,6 +178,29 @@
             <div class="space-y-1.5">
                 <span class="text-xs font-semibold text-gray-500">PCA Explained Variance</span>
                 <div id="info-pca-var" class="px-3 py-2 border border-gray-100 rounded-lg text-sm bg-gray-50 text-gray-500 font-mono">-</div>
+            </div>
+        </div>
+
+        <div class="border-t border-gray-100 pt-4 space-y-4">
+            <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1.5 text-[#0066FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Penjelasan Metriks
+            </h4>
+            <div class="space-y-3.5">
+                <div class="space-y-1">
+                    <span class="text-xs font-semibold text-gray-700 block">Inertia (WCSS)</span>
+                    <span class="text-[11px] text-gray-500 leading-relaxed block">Mengukur tingkat kerapatan klaster. Semakin kecil nilainya, semakin rapat titik data dengan pusat klasternya (lebih padu/kompak).</span>
+                </div>
+                <div class="space-y-1">
+                    <span class="text-xs font-semibold text-gray-700 block">Iterasi Konvergensi</span>
+                    <span class="text-[11px] text-gray-500 leading-relaxed block">Jumlah pengulangan proses algoritma K-Means sampai posisi pusat klaster stabil dan tidak bergeser lagi.</span>
+                </div>
+                <div class="space-y-1">
+                    <span class="text-xs font-semibold text-gray-700 block">PCA Explained Variance</span>
+                    <span class="text-[11px] text-gray-500 leading-relaxed block">Persentase informasi data asli yang berhasil dipertahankan dalam grafik 2D (PC1 & PC2). Persentase tinggi menunjukkan visualisasi sangat akurat.</span>
+                </div>
             </div>
         </div>
     </div>
@@ -450,20 +473,17 @@
                 const color = CLUSTER_COLORS[clusterIdx % CLUSTER_COLORS.length];
                 rows += `
                     <tr class="hover:bg-gray-50/50 transition-colors" data-cluster="${clusterIdx}">
-                        <td class="px-4 py-3 font-medium text-gray-400">${item.nis}</td>
+                        <td class="px-4 py-3 font-medium text-gray-400">${item.siswa_id}</td>
                         <td class="px-4 py-3 font-semibold text-gray-800">${item.nama}</td>
                         <td class="px-3 py-3 text-center">${item.kelas}</td>
-                        <td class="px-2 py-3 text-center">${item.e_score}</td>
-                        <td class="px-2 py-3 text-center">${item.c_score}</td>
-                        <td class="px-2 py-3 text-center">${item.h_score}</td>
-                        <td class="px-2 py-3 text-center">${item.p_score}</td>
-                        <td class="px-3 py-3 text-center font-bold text-gray-900">${item.skor_kesulitan}</td>
-                        <td class="px-2 py-3 text-center italic">${item.pro_score}</td>
-                        <td class="px-4 py-3 text-center">
-                            <span class="inline-block px-3 py-1 font-bold rounded text-[10px] tracking-wide border"
-                                  style="background: ${color.bgLight}; color: ${color.text}; border-color: ${color.border};">
-                                KLASTER ${clusterIdx + 1}
-                            </span>
+                        <td class="px-2 py-3 text-center">${item.skor_e}</td>
+                        <td class="px-2 py-3 text-center">${item.skor_c}</td>
+                        <td class="px-2 py-3 text-center">${item.skor_h}</td>
+                        <td class="px-2 py-3 text-center">${item.skor_p}</td>
+                        <td class="px-3 py-3 text-center font-bold text-gray-900">${item.skor_diff}</td>
+                        <td class="px-2 py-3 text-center italic">${item.skor_pr}</td>
+                        <td class="px-4 py-3 text-center font-medium text-gray-800">
+                            Klaster ${clusterIdx + 1}
                         </td>
                     </tr>
                 `;
@@ -506,12 +526,12 @@
 
             // Mapping kolom yang mungkin ada dari Python
             const colMap = [
-                { key: 'e_score',        label: 'E' },
-                { key: 'c_score',        label: 'C' },
-                { key: 'h_score',        label: 'H' },
-                { key: 'p_score',        label: 'P' },
-                { key: 'pro_score',      label: 'Pr' },
-                { key: 'skor_kesulitan', label: 'Diff' },
+                { key: 'skor_e',    label: 'E' },
+                { key: 'skor_c',    label: 'C' },
+                { key: 'skor_h',    label: 'H' },
+                { key: 'skor_p',    label: 'P' },
+                { key: 'skor_pr',   label: 'Pr' },
+                { key: 'skor_diff', label: 'Diff' },
             ];
 
             let rows = '';
@@ -521,18 +541,13 @@
 
                 rows += '<tr class="hover:bg-gray-50/50 transition-colors">';
 
-                // Kolom Klaster — dengan badge warna
-                rows += `<td class="px-4 py-3">`;
-                rows += `<span class="inline-flex items-center gap-2 px-3 py-1 font-bold rounded text-[11px] tracking-wide border"
-                               style="background: ${color.bgLight}; color: ${color.text}; border-color: ${color.border};">`;
-                rows += `<span class="w-2.5 h-2.5 rounded-full inline-block" style="background: ${color.bg};"></span>`;
-                rows += `Klaster ${c + 1}`;
-                rows += `</span></td>`;
+                // Kolom Klaster
+                rows += `<td class="px-4 py-3 font-medium text-gray-800">Klaster ${c + 1}</td>`;
 
                 // Kolom Rata-rata SDQ
                 colMap.forEach(col => {
                     const val = profile[col.key];
-                    const isDiff = col.key === 'skor_kesulitan';
+                    const isDiff = col.key === 'skor_diff';
                     const extraClass = isDiff ? ' font-bold text-gray-900' : '';
                     rows += `<td class="px-3 py-3 text-center font-mono${extraClass}">`;
                     rows += val !== undefined && val !== null ? val.toFixed(2) : '-';

@@ -261,7 +261,7 @@
     {{-- ============================================================= --}}
     {{-- SIDEBAR: FILTER DAN METRIKS (Kanan) --}}
     {{-- ============================================================= --}}
-    <form action="{{ route('admin.analisis') }}" method="GET" class="w-full lg:w-1/4 bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6 sticky top-20">
+    <form action="{{ route('admin.analisis') }}" method="GET" class="w-full lg:w-1/4 bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
         {{-- Hidden input penanda bahwa form sudah di-submit --}}
         <input type="hidden" name="load" value="1">
 
