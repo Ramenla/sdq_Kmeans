@@ -145,6 +145,21 @@
     @include('layouts.sidebar')
 
     <div class="lg:ml-64 transition-all duration-300 flex flex-col min-h-screen" id="main-content">
+        <script>
+            // Mencegah animasi penutupan sidebar saat halaman dimuat (FOUC)
+            if (window.innerWidth >= 1024 && localStorage.getItem('sidebarClosed') === 'true') {
+                var sb = document.getElementById('logo-sidebar');
+                var mc = document.getElementById('main-content');
+                if (sb) {
+                    sb.style.transition = 'none';
+                    sb.classList.remove('lg:translate-x-0');
+                }
+                if (mc) {
+                    mc.style.transition = 'none';
+                    mc.classList.remove('lg:ml-64');
+                }
+            }
+        </script>
         @include('layouts.header')
         
         <main class="flex-1 p-6 @yield('main_class')">
@@ -172,15 +187,25 @@
             const sidebar = document.getElementById('logo-sidebar');
             const mainContent = document.getElementById('main-content');
             
+            // Kembalikan transisi CSS setelah render awal selesai (jika sebelumnya dimatikan oleh script inline)
+            setTimeout(() => {
+                if (sidebar) sidebar.style.transition = '';
+                if (mainContent) mainContent.style.transition = '';
+            }, 50);
+
             if (sidebar && toggleBtn) {
                 toggleBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    const isDesktop = window.innerWidth >= 1024;
+                    const currentIsDesktop = window.innerWidth >= 1024;
                     
-                    if (isDesktop) {
+                    if (currentIsDesktop) {
                         // Toggle untuk Desktop
                         sidebar.classList.toggle('lg:translate-x-0');
                         if (mainContent) mainContent.classList.toggle('lg:ml-64');
+                        
+                        // Save state to localStorage
+                        sidebarClosed = !sidebar.classList.contains('lg:translate-x-0');
+                        localStorage.setItem('sidebarClosed', sidebarClosed);
                     } else {
                         // Toggle untuk Mobile
                         sidebar.classList.toggle('-translate-x-full');

@@ -4,11 +4,17 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\KMeansController;
 use App\Http\Controllers\SiswaController;
+use App\Http\Controllers\KuesionerController;
 
 // --- RUTE HALAMAN UTAMA (LANDING PAGE) ---
 Route::get('/', function () {
     return view('welcome'); 
 })->name('landing');
+
+// --- RUTE KUESIONER PUBLIK (GUEST MODE) ---
+Route::get('/kuesioner', [KuesionerController::class, 'showForm'])->name('kuesioner.form');
+Route::post('/kuesioner', [KuesionerController::class, 'processForm'])->name('kuesioner.submit');
+Route::get('/kuesioner/hasil/{id}', [KuesionerController::class, 'showHasil'])->name('kuesioner.hasil');
 
 // --- RUTE UNTUK TAMPILAN HALAMAN (GET) ---
 Route::get('/login', [AuthController::class, 'showLoginGuru'])->name('login');
@@ -31,9 +37,7 @@ Route::post('/data-siswa/import', [SiswaController::class, 'import'])->name('sis
 
 Route::get('/admin/analisis-k', [KMeansController::class, 'indexAnalisis'])->name('admin.analisis');
 
-Route::get('/admin/klasterisasi', function () {
-    return view('admin.klasterisasi');
-})->name('admin.klasterisasi');
+Route::get('/admin/klasterisasi', [KMeansController::class, 'indexKlasterisasi'])->name('admin.klasterisasi');
 
 Route::get('/admin/laporan-hasil', function () {
     return view('admin.laporan-hasil');
@@ -43,3 +47,6 @@ Route::get('/admin/laporan-hasil', function () {
 Route::get('/api/preprocess', [KMeansController::class, 'getPreprocessData'])->name('api.preprocess');
 Route::get('/api/elbow', [KMeansController::class, 'getElbowData'])->name('api.elbow');
 Route::post('/api/klasterisasi', [KMeansController::class, 'prosesKlasterisasi'])->name('api.klasterisasi');
+
+// --- RUTE API FORWARD CHAINING ---
+Route::post('/api/recalculate-kategori', [KMeansController::class, 'recalculateKategori'])->name('api.recalculateKategori');

@@ -21,7 +21,7 @@ Aturan Baku ML:
 from flask import Flask, request, jsonify
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.metrics import silhouette_score
@@ -97,11 +97,11 @@ def preprocess():
     if error:
         return error
 
-    # StandardScaler (Z-Score Normalization)
-    scaler = StandardScaler()
+    # MinMaxScaler (Normalization)
+    scaler = MinMaxScaler()
     scaled_data = scaler.fit_transform(df_features)
 
-    # Buat DataFrame hasil standarisasi dengan kolom yang sama
+    # Buat DataFrame hasil normalisasi dengan kolom yang sama
     used_columns = df_features.columns.tolist()
     df_scaled = pd.DataFrame(scaled_data, columns=used_columns)
 
@@ -110,11 +110,11 @@ def preprocess():
 
     return jsonify({
         'status': 'success',
-        'message': 'Preprocessing (Z-Score) berhasil.',
+        'message': 'Preprocessing (Normalisasi) berhasil.',
         'columns': used_columns,
         'scaled_data': df_scaled.to_dict(orient='records'),
-        'scaler_mean': scaler.mean_.tolist(),
-        'scaler_std': scaler.scale_.tolist(),
+        'scaler_min': scaler.data_min_.tolist(),
+        'scaler_max': scaler.data_max_.tolist(),
     }), 200
 
 
@@ -131,8 +131,8 @@ def elbow():
     if error:
         return error
 
-    # StandardScaler
-    scaler = StandardScaler()
+    # MinMaxScaler
+    scaler = MinMaxScaler()
     scaled_data = scaler.fit_transform(df_features)
 
     # Hitung Inertia dan Silhouette untuk K=1 hingga K=10
@@ -214,8 +214,8 @@ def kmeans_clustering():
                         f'jumlah data ({len(df_features)}).'
         }), 422
 
-    # StandardScaler
-    scaler = StandardScaler()
+    # MinMaxScaler
+    scaler = MinMaxScaler()
     scaled_data = scaler.fit_transform(df_features)
 
     # K-Means Clustering

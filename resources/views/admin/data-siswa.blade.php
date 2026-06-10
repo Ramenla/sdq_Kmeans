@@ -51,6 +51,31 @@
                         <input type="date" name="tanggal_pemeriksaan" class="nb-input" value="{{ old('tanggal_pemeriksaan') }}">
                     </div>
                 </div>
+                <div class="pt-2 border-t border-gray-100">
+                    <h3 class="text-sm font-bold text-gray-800 mb-3">Input Skor SDQ Mentah (Opsional)</h3>
+                    <div class="grid grid-cols-5 gap-3">
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1">E (Emosi)</label>
+                            <input type="number" name="skor_e" min="0" max="10" class="nb-input text-center px-1" value="{{ old('skor_e') }}">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1">C (Perilaku)</label>
+                            <input type="number" name="skor_c" min="0" max="10" class="nb-input text-center px-1" value="{{ old('skor_c') }}">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1">H (Hiperaktif)</label>
+                            <input type="number" name="skor_h" min="0" max="10" class="nb-input text-center px-1" value="{{ old('skor_h') }}">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1">P (Teman)</label>
+                            <input type="number" name="skor_p" min="0" max="10" class="nb-input text-center px-1" value="{{ old('skor_p') }}">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1">Pr (Prososial)</label>
+                            <input type="number" name="skor_pr" min="0" max="10" class="nb-input text-center px-1" value="{{ old('skor_pr') }}">
+                        </div>
+                    </div>
+                </div>
                 <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-2">
                     <button type="button" onclick="closeModal('modal-tambah')" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors border border-gray-200">Batal</button>
                     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors text-sm">
@@ -111,6 +136,31 @@
                         <input type="date" name="tanggal_pemeriksaan" id="edit-tgl" class="nb-input">
                     </div>
                 </div>
+                <div class="pt-2 border-t border-gray-100">
+                    <h3 class="text-sm font-bold text-gray-800 mb-3">Input Skor SDQ Mentah (Opsional)</h3>
+                    <div class="grid grid-cols-5 gap-3">
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1">E (Emosi)</label>
+                            <input type="number" name="skor_e" id="edit-skor-e" min="0" max="10" class="nb-input text-center px-1">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1">C (Perilaku)</label>
+                            <input type="number" name="skor_c" id="edit-skor-c" min="0" max="10" class="nb-input text-center px-1">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1">H (Hiperaktif)</label>
+                            <input type="number" name="skor_h" id="edit-skor-h" min="0" max="10" class="nb-input text-center px-1">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1">P (Teman)</label>
+                            <input type="number" name="skor_p" id="edit-skor-p" min="0" max="10" class="nb-input text-center px-1">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1">Pr (Prososial)</label>
+                            <input type="number" name="skor_pr" id="edit-skor-pr" min="0" max="10" class="nb-input text-center px-1">
+                        </div>
+                    </div>
+                </div>
                 <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-2">
                     <button type="button" onclick="closeModal('modal-edit')" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors border border-gray-200">Batal</button>
                     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors text-sm">
@@ -156,12 +206,15 @@
                         <div class="pl-3 flex items-center">
                             <i data-lucide="search" class="w-4 h-4 text-gray-400"></i>
                         </div>
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Nama/NIS Siswa..." class="px-3 py-2 text-sm focus:outline-none w-48 lg:w-64 text-gray-700">
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Nama, ID, Email..." class="px-3 py-2 text-sm focus:outline-none w-48 lg:w-64 text-gray-700">
                         <button type="submit" class="bg-[#0066FF] text-white px-5 py-2 text-sm font-semibold hover:bg-blue-700 transition-colors">Cari</button>
                     </div>
                     <div class="flex items-center gap-3">
                         <button type="button" onclick="if(confirm('Yakin ingin menghapus data terpilih?')) document.getElementById('bulk-delete-form').submit();" id="btn-hapus-terpilih" class="hidden items-center px-4 py-2 bg-white border border-red-500 text-red-500 text-sm font-semibold rounded-lg hover:bg-red-50 transition-all shadow-sm">
                             <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Hapus Terpilih (<span id="count-terpilih">0</span>)
+                        </button>
+                        <button type="button" onclick="recalculateKategori()" id="btn-recalculate" class="flex items-center px-2 py-2 bg-white border border-emerald-500 text-emerald-600 text-sm font-semibold rounded-lg hover:bg-emerald-50 transition-all shadow-sm">
+                            <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i> Recalculate Kategori
                         </button>
                         <button type="button" onclick="openModal('modal-import')" class="flex items-center px-4 py-2 bg-white border border-[#0066FF] text-[#0066FF] text-sm font-semibold rounded-lg hover:bg-blue-50 transition-all shadow-sm">
                             <i data-lucide="download" class="w-4 h-4 mr-2"></i> Import data
@@ -173,11 +226,11 @@
                 </div>
 
                 <div class="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3">
-                    <div class="flex flex-wrap items-center gap-3">
+                    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
                         <!-- Filter Kelas -->
                         <div class="flex flex-col">
                             <label class="text-xs font-semibold text-gray-500 mb-1">Filter Kelas</label>
-                            <select name="kelas" onchange="this.form.submit()" class="px-4 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 text-gray-600 shadow-sm">
+                            <select name="kelas" onchange="this.form.submit()" class="nb-select bg-white">
                                 <option value="">Semua</option>
                                 @foreach($listKelas as $kls)
                                     <option value="{{ $kls }}" {{ request('kelas') == $kls ? 'selected' : '' }}>{{ $kls }}</option>
@@ -188,7 +241,7 @@
                         <!-- Filter Tanggal Tes -->
                         <div class="flex flex-col">
                             <label class="text-xs font-semibold text-gray-500 mb-1">Tanggal Pemeriksaan</label>
-                            <select name="date" onchange="this.form.submit()" class="px-4 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 text-gray-600 shadow-sm">
+                            <select name="date" onchange="this.form.submit()" class="nb-select bg-white">
                                 <option value="">Semua</option>
                                 @foreach($daftarTanggal as $tgl)
                                     <option value="{{ $tgl }}" {{ request('date') == $tgl ? 'selected' : '' }}>{{ \Carbon\Carbon::parse($tgl)->isoFormat('D MMMM YYYY') }}</option>
@@ -199,7 +252,7 @@
                         <!-- Filter Jenis Kelamin -->
                         <div class="flex flex-col">
                             <label class="text-xs font-semibold text-gray-500 mb-1">Jenis Kelamin</label>
-                            <select name="jenis_kelamin" onchange="this.form.submit()" class="px-4 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 text-gray-600 shadow-sm">
+                            <select name="jenis_kelamin" onchange="this.form.submit()" class="nb-select bg-white">
                                 <option value="">Semua</option>
                                 <option value="L" {{ request('jenis_kelamin') == 'L' ? 'selected' : '' }}>Laki-laki (L)</option>
                                 <option value="P" {{ request('jenis_kelamin') == 'P' ? 'selected' : '' }}>Perempuan (P)</option>
@@ -209,11 +262,22 @@
                         <!-- Filter Umur -->
                         <div class="flex flex-col">
                             <label class="text-xs font-semibold text-gray-500 mb-1">Filter Umur</label>
-                            <select name="umur" onchange="this.form.submit()" class="px-4 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 text-gray-600 shadow-sm">
+                            <select name="umur" onchange="this.form.submit()" class="nb-select bg-white">
                                 <option value="">Semua</option>
                                 @foreach($listUmur as $umr)
                                     <option value="{{ $umr }}" {{ request('umur') == $umr ? 'selected' : '' }}>{{ $umr }} Tahun</option>
                                 @endforeach
+                            </select>
+                        </div>
+                        
+                        <!-- Filter Kategori -->
+                        <div class="flex flex-col">
+                            <label class="text-xs font-semibold text-gray-500 mb-1">Kategori</label>
+                            <select name="kategori" onchange="this.form.submit()" class="nb-select bg-white">
+                                <option value="">Semua</option>
+                                <option value="Normal" {{ request('kategori') == 'Normal' ? 'selected' : '' }}>Normal</option>
+                                <option value="Borderline" {{ request('kategori') == 'Borderline' ? 'selected' : '' }}>Borderline</option>
+                                <option value="Abnormal" {{ request('kategori') == 'Abnormal' ? 'selected' : '' }}>Abnormal</option>
                             </select>
                         </div>
                     </div>
@@ -235,37 +299,37 @@
                 @method('DELETE')
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="table-container overflow-x-auto">
-                    <table class="w-full text-left border-collapse min-w-[1200px]">
+                    <table class="w-full text-left border-collapse ">
                         <thead>
-                            <tr class="bg-gray-50/50 border-b border-gray-100 text-[11px] text-gray-400 font-bold uppercase tracking-widest">
-                                <th class="px-4 py-4 text-center">
+                            <tr class="bg-gray-50/50 border-b border-gray-100 text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                                <th class="px-2 py-2.5 text-center">
                                     <input type="checkbox" id="check-all" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" onclick="toggleAllCheckboxes(this)">
                                 </th>
-                                <th class="px-4 py-4 text-center">ID Siswa</th>
-                                <th class="px-6 py-4">
+                                <th class="px-2 py-2.5 text-center">ID Siswa</th>
+                                <th class="px-3 py-2.5">
                                     <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'nama_siswa', 'order' => (request('sort_by') === 'nama_siswa' && request('order') === 'asc') ? 'desc' : 'asc']) }}" class="inline-flex items-center gap-1 hover:text-[#0066FF] transition-colors cursor-pointer normal-case">
                                         <span>Nama Siswa</span>
                                         @if(request('sort_by') === 'nama_siswa')
                                             @if(request('order') === 'desc')
-                                                <i data-lucide="arrow-down" class="w-3.5 h-3.5 text-[#0066FF]"></i>
+                                                <i data-lucide="arrow-down" class="w-3 h-3 text-[#0066FF]"></i>
                                             @else
-                                                <i data-lucide="arrow-up" class="w-3.5 h-3.5 text-[#0066FF]"></i>
+                                                <i data-lucide="arrow-up" class="w-3 h-3 text-[#0066FF]"></i>
                                             @endif
                                         @else
-                                            <i data-lucide="chevrons-up-down" class="w-3.5 h-3.5 text-gray-300"></i>
+                                            <i data-lucide="chevrons-up-down" class="w-3 h-3 text-gray-300"></i>
                                         @endif
                                     </a>
                                 </th>
-                                <th class="px-4 py-4 text-center">Kelas</th>
-                                <th class="px-4 py-4 text-center">Jenis Kelamin</th>
-                                <th class="px-4 py-4 text-center">Umur</th>
-                                <th class="px-4 py-4 text-center">Email</th>
-                                <th class="px-4 py-4 text-center">No HP</th>
-                                <th class="px-6 py-4 text-center">Tanggal Pemeriksaan</th>
-                                <th class="px-3 py-4 text-center">
-                                    <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'e_score', 'order' => (request('sort_by') === 'e_score' && request('order') === 'asc') ? 'desc' : 'asc']) }}" class="inline-flex items-center gap-0.5 justify-center hover:text-[#0066FF] transition-colors cursor-pointer normal-case w-full">
+                                <th class="px-2 py-2.5 text-center">Kelas</th>
+                                <th class="px-2 py-2.5 text-center">Jenis Kelamin</th>
+                                <th class="px-2 py-2.5 text-center">Umur</th>
+                                <th class="px-2 py-2.5 text-center">Email</th>
+                                <th class="px-2 py-2.5 text-center">No HP</th>
+                                <th class="px-3 py-2.5 text-center">Tanggal Pemeriksaan</th>
+                                <th class="px-1 py-2.5 text-center">
+                                    <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'skor_e', 'order' => (request('sort_by') === 'skor_e' && request('order') === 'asc') ? 'desc' : 'asc']) }}" class="inline-flex items-center gap-0.5 justify-center hover:text-[#0066FF] transition-colors cursor-pointer normal-case w-full">
                                         <span>E</span>
-                                        @if(request('sort_by') === 'e_score')
+                                        @if(request('sort_by') === 'skor_e')
                                             @if(request('order') === 'desc')
                                                 <i data-lucide="arrow-down" class="w-3 h-3 text-[#0066FF]"></i>
                                             @else
@@ -276,10 +340,10 @@
                                         @endif
                                     </a>
                                 </th>
-                                <th class="px-3 py-4 text-center">
-                                    <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'c_score', 'order' => (request('sort_by') === 'c_score' && request('order') === 'asc') ? 'desc' : 'asc']) }}" class="inline-flex items-center gap-0.5 justify-center hover:text-[#0066FF] transition-colors cursor-pointer normal-case w-full">
+                                <th class="px-1 py-2.5 text-center">
+                                    <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'skor_c', 'order' => (request('sort_by') === 'skor_c' && request('order') === 'asc') ? 'desc' : 'asc']) }}" class="inline-flex items-center gap-0.5 justify-center hover:text-[#0066FF] transition-colors cursor-pointer normal-case w-full">
                                         <span>C</span>
-                                        @if(request('sort_by') === 'c_score')
+                                        @if(request('sort_by') === 'skor_c')
                                             @if(request('order') === 'desc')
                                                 <i data-lucide="arrow-down" class="w-3 h-3 text-[#0066FF]"></i>
                                             @else
@@ -290,10 +354,10 @@
                                         @endif
                                     </a>
                                 </th>
-                                <th class="px-3 py-4 text-center">
-                                    <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'h_score', 'order' => (request('sort_by') === 'h_score' && request('order') === 'asc') ? 'desc' : 'asc']) }}" class="inline-flex items-center gap-0.5 justify-center hover:text-[#0066FF] transition-colors cursor-pointer normal-case w-full">
+                                <th class="px-1 py-2.5 text-center">
+                                    <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'skor_h', 'order' => (request('sort_by') === 'skor_h' && request('order') === 'asc') ? 'desc' : 'asc']) }}" class="inline-flex items-center gap-0.5 justify-center hover:text-[#0066FF] transition-colors cursor-pointer normal-case w-full">
                                         <span>H</span>
-                                        @if(request('sort_by') === 'h_score')
+                                        @if(request('sort_by') === 'skor_h')
                                             @if(request('order') === 'desc')
                                                 <i data-lucide="arrow-down" class="w-3 h-3 text-[#0066FF]"></i>
                                             @else
@@ -304,10 +368,10 @@
                                         @endif
                                     </a>
                                 </th>
-                                <th class="px-3 py-4 text-center">
-                                    <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'p_score', 'order' => (request('sort_by') === 'p_score' && request('order') === 'asc') ? 'desc' : 'asc']) }}" class="inline-flex items-center gap-0.5 justify-center hover:text-[#0066FF] transition-colors cursor-pointer normal-case w-full">
+                                <th class="px-1 py-2.5 text-center">
+                                    <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'skor_p', 'order' => (request('sort_by') === 'skor_p' && request('order') === 'asc') ? 'desc' : 'asc']) }}" class="inline-flex items-center gap-0.5 justify-center hover:text-[#0066FF] transition-colors cursor-pointer normal-case w-full">
                                         <span>P</span>
-                                        @if(request('sort_by') === 'p_score')
+                                        @if(request('sort_by') === 'skor_p')
                                             @if(request('order') === 'desc')
                                                 <i data-lucide="arrow-down" class="w-3 h-3 text-[#0066FF]"></i>
                                             @else
@@ -318,24 +382,24 @@
                                         @endif
                                     </a>
                                 </th>
-                                <th class="px-4 py-4 text-center text-[#0066FF] bg-blue-50/50">
-                                    <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'diff', 'order' => (request('sort_by') === 'diff' && request('order') === 'asc') ? 'desc' : 'asc']) }}" class="inline-flex items-center gap-1 justify-center hover:text-[#0066FF] transition-colors cursor-pointer normal-case w-full">
+                                <th class="px-2 py-2.5 text-center text-[#0066FF] bg-blue-50/50">
+                                    <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'skor_diff', 'order' => (request('sort_by') === 'skor_diff' && request('order') === 'asc') ? 'desc' : 'asc']) }}" class="inline-flex items-center gap-1 justify-center hover:text-[#0066FF] transition-colors cursor-pointer normal-case w-full">
                                         <span>Total Kesulitan</span>
-                                        @if(request('sort_by') === 'diff')
+                                        @if(request('sort_by') === 'skor_diff')
                                             @if(request('order') === 'desc')
-                                                <i data-lucide="arrow-down" class="w-3.5 h-3.5 text-[#0066FF]"></i>
+                                                <i data-lucide="arrow-down" class="w-3 h-3 text-[#0066FF]"></i>
                                             @else
-                                                <i data-lucide="arrow-up" class="w-3.5 h-3.5 text-[#0066FF]"></i>
+                                                <i data-lucide="arrow-up" class="w-3 h-3 text-[#0066FF]"></i>
                                             @endif
                                         @else
-                                            <i data-lucide="chevrons-up-down" class="w-3.5 h-3.5 text-blue-300"></i>
+                                            <i data-lucide="chevrons-up-down" class="w-3 h-3 text-blue-300"></i>
                                         @endif
                                     </a>
                                 </th>
-                                <th class="px-3 py-4 text-center">
-                                    <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'pro_score', 'order' => (request('sort_by') === 'pro_score' && request('order') === 'asc') ? 'desc' : 'asc']) }}" class="inline-flex items-center gap-0.5 justify-center hover:text-[#0066FF] transition-colors cursor-pointer normal-case w-full">
+                                <th class="px-1 py-2.5 text-center">
+                                    <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'skor_pr', 'order' => (request('sort_by') === 'skor_pr' && request('order') === 'asc') ? 'desc' : 'asc']) }}" class="inline-flex items-center gap-0.5 justify-center hover:text-[#0066FF] transition-colors cursor-pointer normal-case w-full">
                                         <span>Pr</span>
-                                        @if(request('sort_by') === 'pro_score')
+                                        @if(request('sort_by') === 'skor_pr')
                                             @if(request('order') === 'desc')
                                                 <i data-lucide="arrow-down" class="w-3 h-3 text-[#0066FF]"></i>
                                             @else
@@ -346,64 +410,63 @@
                                         @endif
                                     </a>
                                 </th>
-                                <th class="px-6 py-4 text-center">Aksi</th>
+                                <th class="px-2 py-2.5 text-center">Kategori</th>
+                                <th class="px-3 py-2.5 text-center">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="text-sm text-gray-600 divide-y divide-gray-50">
+                        <tbody class="text-xs text-gray-600 divide-y divide-gray-50">
                             @forelse ($dataSiswa as $data)
                                 <tr class="hover:bg-blue-50/20 transition-colors">
-                                    <td class="px-4 py-4 text-center">
+                                    <td class="px-2 py-2.5 text-center">
                                         <input type="checkbox" name="ids[]" value="{{ $data->id }}" class="row-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" onchange="updateBulkDeleteButton()">
                                     </td>
-                                    <td class="px-4 py-4 text-center font-medium text-gray-400">{{ $data->id }}</td>
-                                    <td class="px-6 py-4 font-semibold text-gray-800">{{ $data->nama_siswa ?: '-' }}</td>
-                                    <td class="px-4 py-4 text-center">{{ $data->kelas ?? '-' }}</td>
-                                    <td class="px-4 py-4 text-center font-medium text-gray-700">{{ $data->jenis_kelamin ?? '-' }}</td>
-                                    <td class="px-4 py-4 text-center">{{ $data->umur }}</td>
-                                    <td class="px-4 py-4 text-center">{{ $data->email ?? '-' }}</td>
-                                    <td class="px-4 py-4 text-center">{{ $data->no_hp ?? '-' }}</td>
+                                    <td class="px-2 py-2.5 text-center font-medium text-gray-400">{{ $data->id }}</td>
+                                    <td class="px-3 py-2.5 font-semibold text-gray-800">{{ $data->nama_siswa ?: '-' }}</td>
+                                    <td class="px-2 py-2.5 text-center">{{ $data->kelas ?? '-' }}</td>
+                                    <td class="px-2 py-2.5 text-center font-medium text-gray-700">{{ $data->jenis_kelamin ?? '-' }}</td>
+                                    <td class="px-2 py-2.5 text-center">{{ $data->umur }}</td>
+                                    <td class="px-2 py-2.5 text-center">{{ $data->email ?? '-' }}</td>
+                                    <td class="px-2 py-2.5 text-center">{{ $data->no_hp ?? '-' }}</td>
                                     
                                     @php
                                         $skor = $data->skorSdq->first();
                                     @endphp
                                     
-                                    <td class="px-6 py-4 text-center">{{ $skor && $skor->tanggal_pemeriksaan ? \Carbon\Carbon::parse($skor->tanggal_pemeriksaan)->isoFormat('dddd, D MMMM YYYY') : '-' }}</td>
-                                    <td class="px-3 py-4 text-center">{{ $skor->skor_e ?? '-' }}</td>
-                                    <td class="px-3 py-4 text-center">{{ $skor->skor_c ?? '-' }}</td>
-                                    <td class="px-3 py-4 text-center">{{ $skor->skor_h ?? '-' }}</td>
-                                    <td class="px-3 py-4 text-center">{{ $skor->skor_p ?? '-' }}</td>
-                                    <td class="px-4 py-4 text-center font-bold text-gray-900 bg-blue-50/30 text-base">{{ $skor->skor_diff ?? '-' }}</td>
-                                    <td class="px-3 py-4 text-center italic">{{ $skor->skor_pr ?? '-' }}</td>
-                                    <td class="px-4 py-4">
+                                    <td class="px-3 py-2.5 text-center">{{ $skor && $skor->tanggal_pemeriksaan ? \Carbon\Carbon::parse($skor->tanggal_pemeriksaan)->isoFormat('dddd, D MMMM YYYY') : '-' }}</td>
+                                    <td class="px-1 py-2.5 text-center">{{ $skor->skor_e ?? '-' }}</td>
+                                    <td class="px-1 py-2.5 text-center">{{ $skor->skor_c ?? '-' }}</td>
+                                    <td class="px-1 py-2.5 text-center">{{ $skor->skor_h ?? '-' }}</td>
+                                    <td class="px-1 py-2.5 text-center">{{ $skor->skor_p ?? '-' }}</td>
+                                    <td class="px-2 py-2.5 text-center font-bold text-gray-900 bg-blue-50/30 text-sm">{{ $skor->skor_diff ?? '-' }}</td>
+                                    <td class="px-1 py-2.5 text-center italic">{{ $skor->skor_pr ?? '-' }}</td>
+                                    <td class="px-2 py-2.5 text-center font-semibold text-sm">
+                                        {{ $skor->kategori ?? '-' }}
+                                    </td>
+                                    <td class="px-2 py-2.5">
                                         <div class="flex justify-center items-center gap-2">
                                             {{-- Tombol Edit --}}
                                             <button type="button"
-                                                onclick="openEditModal({{ $data->id }}, '{{ addslashes($data->no_hp ?? '') }}', '{{ addslashes($data->nama_siswa ?? '') }}', '{{ addslashes($data->email ?? '') }}', '{{ addslashes($data->kelas ?? '') }}', '{{ $data->jenis_kelamin ?? '' }}', '{{ $data->umur ?? '' }}', '{{ $skor->tanggal_pemeriksaan ?? '' }}')"
-                                                class="bg-amber-400 hover:bg-amber-500 text-gray-800 font-medium px-3 py-1.5 rounded-md shadow-sm transition-colors duration-200 flex items-center gap-1 text-sm"
+                                                onclick="openEditModal({{ $data->id }}, '{{ addslashes($data->no_hp ?? '') }}', '{{ addslashes($data->nama_siswa ?? '') }}', '{{ addslashes($data->email ?? '') }}', '{{ addslashes($data->kelas ?? '') }}', '{{ $data->jenis_kelamin ?? '' }}', '{{ $data->umur ?? '' }}', '{{ $skor->tanggal_pemeriksaan ?? '' }}', '{{ $skor->skor_e ?? '' }}', '{{ $skor->skor_c ?? '' }}', '{{ $skor->skor_h ?? '' }}', '{{ $skor->skor_p ?? '' }}', '{{ $skor->skor_pr ?? '' }}')"
+                                                class="bg-amber-400 hover:bg-amber-500 text-gray-800 font-medium px-2 py-1 rounded-md shadow-sm transition-colors duration-200 flex items-center gap-1 text-sm"
                                                 title="Edit Data">
-                                                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                                                <i data-lucide="pencil" class="w-3 h-3"></i>
                                                 Edit
                                             </button>
 
                                             {{-- Tombol Hapus --}}
-                                            <form action="{{ route('siswa.destroy', $data->id) }}" method="POST" 
-                                                  onsubmit="return confirm('Yakin ingin menghapus data siswa {{ addslashes($data->nama_siswa ?? '') }}?');" 
-                                                  class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" 
-                                                    class="bg-red-500 hover:bg-red-600 text-white font-medium px-3 py-1.5 rounded-md shadow-sm transition-colors duration-200 flex items-center gap-1 text-sm"
-                                                    title="Hapus Data">
-                                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                                    Hapus
-                                                </button>
-                                            </form>
+                                            <button type="button" 
+                                                onclick="deleteSiswa({{ $data->id }}, '{{ addslashes($data->nama_siswa ?? '') }}')"
+                                                class="bg-red-500 hover:bg-red-600 text-white font-medium px-2 py-1 rounded-md shadow-sm transition-colors duration-200 flex items-center gap-1 text-sm"
+                                                title="Hapus Data">
+                                                <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                                Hapus
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="14" class="px-6 py-10 text-center text-gray-400 italic">Belum ada data kuesioner siswa.</td>
+                                    <td colspan="16" class="px-6 py-10 text-center text-gray-400 italic">Belum ada data kuesioner siswa.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -421,6 +484,12 @@
             </div>
             </form>
 
+            {{-- Form Hapus Tunggal (Hidden) --}}
+            <form id="form-delete-single" method="POST" class="hidden">
+                @csrf
+                @method('DELETE')
+            </form>
+
 @endsection
 
 @push('scripts')
@@ -436,7 +505,7 @@
         document.body.style.overflow = '';
     }
 
-    function openEditModal(userId, noHp, name, email, kelas, jk, umur, tglPemeriksaan) {
+    function openEditModal(userId, noHp, name, email, kelas, jk, umur, tglPemeriksaan, skorE, skorC, skorH, skorP, skorPr) {
         document.getElementById('form-edit').action = '/siswa/' + userId;
         document.getElementById('edit-no_hp').value = noHp;
         document.getElementById('edit-name').value = name;
@@ -445,6 +514,11 @@
         document.getElementById('edit-jk').value = jk;
         document.getElementById('edit-umur').value = umur;
         document.getElementById('edit-tgl').value = tglPemeriksaan;
+        document.getElementById('edit-skor-e').value = skorE;
+        document.getElementById('edit-skor-c').value = skorC;
+        document.getElementById('edit-skor-h').value = skorH;
+        document.getElementById('edit-skor-p').value = skorP;
+        document.getElementById('edit-skor-pr').value = skorPr;
         openModal('modal-edit');
     }
 
@@ -471,6 +545,15 @@
     @elseif($errors->any() && !old('_method'))
         openModal('modal-tambah');
     @endif
+
+    // ===== SINGLE DELETE FUNCTION =====
+    function deleteSiswa(id, name) {
+        if (confirm('Yakin ingin menghapus data siswa ' + name + '?')) {
+            const form = document.getElementById('form-delete-single');
+            form.action = '/siswa/' + id;
+            form.submit();
+        }
+    }
 
     // ===== BULK DELETE FUNCTIONS =====
     function toggleAllCheckboxes(source) {
@@ -503,6 +586,41 @@
         } else if (masterCheckbox) {
             masterCheckbox.checked = false;
         }
+    }
+
+    // ===== RECALCULATE KATEGORI =====
+    function recalculateKategori() {
+        const btn = document.getElementById('btn-recalculate');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i> Memproses...';
+        btn.disabled = true;
+
+        fetch('{{ route("api.recalculateKategori") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert(data.message);
+                window.location.reload();
+            } else {
+                alert('Gagal: ' + (data.message || 'Terjadi kesalahan'));
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+        })
+        .catch(error => {
+            alert('Error: ' + error.message);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        });
     }
 </script>
 @endpush

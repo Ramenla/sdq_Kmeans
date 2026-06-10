@@ -1,4 +1,4 @@
-<header class="h-16 bg-white z-20 flex items-center justify-between px-4 sm:px-8 shrink-0 w-full">
+<header class="sticky top-0 h-16 bg-white z-20 flex items-center justify-between px-4 sm:px-8 shrink-0 w-full shadow-sm">
     <div class="flex items-center">
         <button id="sidebarToggle" class="p-2 rounded-lg text-gray-800 hover:bg-gray-100 transition-colors focus:outline-none">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">

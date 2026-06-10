@@ -17,15 +17,20 @@ class SiswaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'no_hp'         => 'nullable|string|max:20|unique:siswas,no_hp',
+            'no_hp'         => 'nullable|string|max:20',
             'name'          => 'nullable|string|max:255',
             'email'         => 'nullable|email|unique:siswas,email',
             'kelas'         => 'required|string|max:50',
             'jenis_kelamin' => 'required|in:L,P',
             'umur'          => 'nullable|integer',
             'tanggal_pemeriksaan' => 'nullable|date',
+            'skor_e'        => 'nullable|integer|min:0|max:10',
+            'skor_c'        => 'nullable|integer|min:0|max:10',
+            'skor_h'        => 'nullable|integer|min:0|max:10',
+            'skor_p'        => 'nullable|integer|min:0|max:10',
+            'skor_pr'       => 'nullable|integer|min:0|max:10',
         ], [
-            'no_hp.unique'           => 'No HP sudah terdaftar di sistem.',
+            // 'no_hp.unique' dihilangkan
             'email.email'            => 'Format email tidak valid.',
             'email.unique'           => 'Email sudah terdaftar di sistem.',
             'kelas.required'         => 'Kelas wajib diisi.',
@@ -45,12 +50,12 @@ class SiswaController extends Controller
         SkorSdq::create([
             'siswa_id'            => $siswa->id,
             'tanggal_pemeriksaan' => $request->tanggal_pemeriksaan ?? now()->format('Y-m-d'),
-            'skor_e'              => 0,
-            'skor_c'              => 0,
-            'skor_h'              => 0,
-            'skor_p'              => 0,
-            'skor_pr'             => 0,
-            'skor_diff'           => 0,
+            'skor_e'              => $request->skor_e ?? 0,
+            'skor_c'              => $request->skor_c ?? 0,
+            'skor_h'              => $request->skor_h ?? 0,
+            'skor_p'              => $request->skor_p ?? 0,
+            'skor_pr'             => $request->skor_pr ?? 0,
+            'skor_diff'           => 0, // Akan dikalkulasi otomatis oleh Model SkorSdq
         ]);
 
         return redirect()->route('dashboard.guru')->with('success', 'Data siswa berhasil ditambahkan!');
@@ -62,15 +67,20 @@ class SiswaController extends Controller
     public function update(Request $request, Siswa $siswa)
     {
         $request->validate([
-            'no_hp'         => 'nullable|string|max:20|unique:siswas,no_hp,' . $siswa->id,
+            'no_hp'         => 'nullable|string|max:20',
             'name'          => 'nullable|string|max:255',
             'email'         => 'nullable|email|unique:siswas,email,' . $siswa->id,
             'kelas'         => 'required|string|max:50',
             'jenis_kelamin' => 'required|in:L,P',
             'umur'          => 'nullable|integer',
             'tanggal_pemeriksaan' => 'nullable|date',
+            'skor_e'        => 'nullable|integer|min:0|max:10',
+            'skor_c'        => 'nullable|integer|min:0|max:10',
+            'skor_h'        => 'nullable|integer|min:0|max:10',
+            'skor_p'        => 'nullable|integer|min:0|max:10',
+            'skor_pr'       => 'nullable|integer|min:0|max:10',
         ], [
-            'no_hp.unique'           => 'No HP sudah terdaftar di sistem.',
+            // 'no_hp.unique' dihilangkan
             'email.email'            => 'Format email tidak valid.',
             'email.unique'           => 'Email sudah terdaftar di sistem.',
             'kelas.required'         => 'Kelas wajib diisi.',
@@ -87,16 +97,21 @@ class SiswaController extends Controller
             'umur'                => $request->umur,
         ]);
 
-        if ($request->filled('tanggal_pemeriksaan')) {
-            $skor = $siswa->skorSdq()->latest('tanggal_pemeriksaan')->first();
-            if ($skor) {
-                $skor->update(['tanggal_pemeriksaan' => $request->tanggal_pemeriksaan]);
-            } else {
-                SkorSdq::create([
-                    'siswa_id'            => $siswa->id,
-                    'tanggal_pemeriksaan' => $request->tanggal_pemeriksaan,
-                ]);
-            }
+        $skorData = [
+            'tanggal_pemeriksaan' => $request->tanggal_pemeriksaan ?? now()->format('Y-m-d'),
+            'skor_e'              => $request->skor_e ?? 0,
+            'skor_c'              => $request->skor_c ?? 0,
+            'skor_h'              => $request->skor_h ?? 0,
+            'skor_p'              => $request->skor_p ?? 0,
+            'skor_pr'             => $request->skor_pr ?? 0,
+        ];
+
+        $skor = $siswa->skorSdq()->latest('tanggal_pemeriksaan')->first();
+        if ($skor) {
+            $skor->update($skorData);
+        } else {
+            $skorData['siswa_id'] = $siswa->id;
+            SkorSdq::create($skorData);
         }
 
         return redirect()->route('dashboard.guru')->with('success', 'Data siswa berhasil diperbarui!');

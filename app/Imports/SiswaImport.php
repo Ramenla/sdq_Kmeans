@@ -73,17 +73,18 @@ class SiswaImport implements ToCollection, WithHeadingRow
                 $jenisKelamin = 'P';
             }
 
-            // Cari atau buat Siswa berdasarkan no_hp
-            $siswa = Siswa::updateOrCreate(
-                ['no_hp' => $noHp],
-                [
-                    'nama_siswa'    => $row['nama'] ?? $row['nama_siswa'] ?? null, 
-                    'email'         => $email,
-                    'kelas'         => $row['kelas'] ?? '-',
-                    'jenis_kelamin' => $jenisKelamin,
-                    'umur'          => $umur,
-                ]
-            );
+            $namaSiswa = $row['nama'] ?? $row['nama_siswa'] ?? null;
+            $kelasSiswa = $row['kelas'] ?? '-';
+
+            // Buat Siswa baru untuk setiap baris agar data anonim (seperti '-') tidak saling menimpa
+            $siswa = Siswa::create([
+                'no_hp'         => $noHp,
+                'nama_siswa'    => $namaSiswa,
+                'kelas'         => $kelasSiswa,
+                'email'         => $email,
+                'jenis_kelamin' => $jenisKelamin,
+                'umur'          => $umur,
+            ]);
 
             // Simpan skor SDQ ke tabel skor_sdqs
             SkorSdq::create([

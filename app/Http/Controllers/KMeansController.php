@@ -6,6 +6,7 @@ use App\Models\Siswa;
 use App\Models\SkorSdq;
 use App\Models\ClusteringHistory;
 use App\Models\ClusterResult;
+use App\Services\ForwardChainingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -27,11 +28,13 @@ class KMeansController extends Controller
     {
         $query = Siswa::with('skorSdq');
 
-        // Filter: Pencarian nama / NIS siswa
+        // Filter: Pencarian nama, id, email, atau no hp
         $query->when($request->filled('search'), function ($q) use ($request) {
             $search = $request->query('search');
             $q->where(function ($uq) use ($search) {
                 $uq->where('nama_siswa', 'like', '%' . $search . '%')
+                   ->orWhere('id', 'like', '%' . $search . '%')
+                   ->orWhere('email', 'like', '%' . $search . '%')
                    ->orWhere('no_hp', 'like', '%' . $search . '%');
             });
         });
@@ -55,6 +58,13 @@ class KMeansController extends Controller
         $query->when($request->filled('date'), function ($q) use ($request) {
             $q->whereHas('skorSdq', function ($sq) use ($request) {
                 $sq->whereDate('tanggal_pemeriksaan', $request->query('date'));
+            });
+        });
+
+        // Filter: Kategori
+        $query->when($request->filled('kategori'), function ($q) use ($request) {
+            $q->whereHas('skorSdq', function ($sq) use ($request) {
+                $sq->where('kategori', $request->query('kategori'));
             });
         });
 
@@ -116,6 +126,10 @@ class KMeansController extends Controller
 
         $query->when($request->filled('date'), function ($q) use ($request) {
             $q->whereDate('tanggal_pemeriksaan', $request->query('date'));
+        });
+
+        $query->when($request->filled('kategori'), function ($q) use ($request) {
+            $q->where('kategori', $request->query('kategori'));
         });
 
         return $query->get();
@@ -250,6 +264,41 @@ class KMeansController extends Controller
             ->pluck('tanggal_pemeriksaan');
 
         return view('admin.analisis-k', compact(
+            'dataSiswa', 'listKelas', 'listUmur', 'daftarTanggal',
+            'loaded', 'activeColumns', 'showDiff'
+        ));
+    }
+
+    /**
+     * Tampilkan halaman Klasterisasi K-Means.
+     */
+    public function indexKlasterisasi(Request $request)
+    {
+        $loaded = $request->has('load');
+        $dataSiswa = $loaded
+            ? $this->buildSiswaQuery($request)->paginate(10)
+            : null;
+
+        $activeColumns = $this->getActiveColumns($request);
+        $showDiff = $request->query('cb_diff') == '1';
+
+        $listKelas = Siswa::whereNotNull('kelas')
+            ->where('kelas', '!=', '')
+            ->distinct()
+            ->orderBy('kelas')
+            ->pluck('kelas');
+
+        $listUmur = Siswa::distinct()
+            ->orderBy('umur')
+            ->pluck('umur');
+
+        $daftarTanggal = SkorSdq::selectRaw('DATE(tanggal_pemeriksaan) as tanggal_pemeriksaan')
+            ->distinct()
+            ->whereNotNull('tanggal_pemeriksaan')
+            ->orderBy('tanggal_pemeriksaan', 'desc')
+            ->pluck('tanggal_pemeriksaan');
+
+        return view('admin.klasterisasi', compact(
             'dataSiswa', 'listKelas', 'listUmur', 'daftarTanggal',
             'loaded', 'activeColumns', 'showDiff'
         ));
@@ -564,6 +613,40 @@ class KMeansController extends Controller
             return response()->json([
                 'status'  => 'error',
                 'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    // =============================================================
+    //  FORWARD CHAINING: Re-klasifikasi seluruh data
+    // =============================================================
+
+    /**
+     * Jalankan ulang Forward Chaining pada semua data skor SDQ.
+     * Digunakan untuk mengisi kolom kategori pada data lama
+     * yang belum memiliki label klasifikasi.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function recalculateKategori()
+    {
+        try {
+            $fc = new ForwardChainingService();
+            $count = $fc->classifyAll();
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => "Forward Chaining berhasil dijalankan pada {$count} data.",
+                'total_updated' => $count,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Gagal menjalankan Forward Chaining', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Gagal menjalankan Forward Chaining: ' . $e->getMessage(),
             ], 500);
         }
     }

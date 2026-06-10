@@ -143,8 +143,7 @@
                     <div class="flex justify-between items-center">
                         <h2 class="text-gray-800 font-bold text-base tracking-tight text-[#0066FF]">Preview Preprocessing Data</h2>
                         <div class="flex gap-2">
-                            <button class="px-3 py-1.5 border border-[#0066FF] text-[#0066FF] hover:bg-blue-50 font-semibold rounded-lg text-xs transition-all shadow-sm">Normalisasi</button>
-                            <button id="btn-standarisasi" class="px-3 py-1.5 bg-[#0066FF] text-white hover:bg-blue-700 font-semibold rounded-lg text-xs transition-all shadow-md {{ !$loaded ? 'opacity-50 cursor-not-allowed' : '' }}" {{ !$loaded ? 'disabled' : '' }}>Standarisasi</button>
+                            <button id="btn-normalisasi" class="px-3 py-1.5 bg-[#0066FF] text-white hover:bg-blue-700 font-semibold rounded-lg text-xs transition-all shadow-md {{ !$loaded ? 'opacity-50 cursor-not-allowed' : '' }}" {{ !$loaded ? 'disabled' : '' }}>Normalisasi</button>
                         </div>
                     </div>
 
@@ -291,7 +290,7 @@
                     <span>(P) Masalah Teman Sebaya</span>
                 </label>
                 <label class="flex items-center space-x-3 cursor-pointer p-2 bg-blue-50/50 rounded-lg text-gray-700 border border-blue-100/30">
-                    <input type="checkbox" id="cb-diff" name="cb_diff" value="1" {{ request('cb_diff') == '1' ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
+                    <input type="checkbox" id="cb-diff" name="cb_diff" value="1" {{ request('cb_diff', '1') == '1' ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
                     <span class="font-bold text-[#0066FF]">(Diff) Total Kesulitan</span>
                 </label>
                 <label class="flex items-center space-x-3 cursor-pointer p-1 rounded hover:bg-gray-50">
@@ -407,14 +406,14 @@
         };
 
         // ===================================================================
-        // FETCH API: TOMBOL STANDARISASI → /api/preprocess + filter
+        // FETCH API: TOMBOL NORMALISASI → /api/preprocess + filter
         // ===================================================================
-        const btnStandarisasi = document.getElementById('btn-standarisasi');
+        const btnNormalisasi = document.getElementById('btn-normalisasi');
         const tbodyPreprocessing = document.getElementById('tbody-preprocessing');
         const theadPreprocessing = document.getElementById('thead-preprocessing');
 
-        if (btnStandarisasi && !btnStandarisasi.disabled) {
-            btnStandarisasi.addEventListener('click', async function() {
+        if (btnNormalisasi && !btnNormalisasi.disabled) {
+            btnNormalisasi.addEventListener('click', async function() {
                 const originalText = this.textContent;
                 this.textContent = 'Memproses...';
                 this.disabled = true;
@@ -429,7 +428,7 @@
                         let headerHTML = '<tr><th class="px-4 py-3">No</th><th class="px-4 py-3">ID Siswa</th><th class="px-4 py-3">Nama Siswa</th>';
                         cols.forEach(col => {
                             const label = columnLabels[col] || col;
-                            headerHTML += `<th class="px-2 py-3 text-center">${label} (Z)</th>`;
+                            headerHTML += `<th class="px-2 py-3 text-center">${label} (Norm)</th>`;
                         });
                         headerHTML += '</tr>';
                         theadPreprocessing.innerHTML = headerHTML;

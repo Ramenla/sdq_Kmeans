@@ -30,15 +30,15 @@
             </p>
         </a>
 
-        <a href="#" onclick="alert('Fitur login siswa dinonaktifkan sementara.'); return false;" class="group bg-white p-10 rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] opacity-60 cursor-not-allowed border border-transparent transition-all duration-300 flex flex-col items-center text-center">
-            <div class="text-gray-400 mb-5">
+        <a href="{{ route('kuesioner.form') }}" class="group bg-white p-10 rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-transparent hover:border-indigo-100 transition-all duration-300 flex flex-col items-center text-center">
+            <div class="text-indigo-500 mb-5 group-hover:scale-110 transition-transform duration-300">
                 <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/>
                 </svg>
             </div>
             <h2 class="text-lg font-bold text-gray-900 mb-3">Siswa</h2>
             <p class="text-xs text-gray-500 leading-relaxed max-w-[200px]">
-                Mulai screening & pantau kesehatan mental anda dengan alat evaluasi mandiri yang mudah digunakan
+                Mulai screening &amp; pantau kesehatan mental anda dengan alat evaluasi mandiri yang mudah digunakan
             </p>
         </a>
 
