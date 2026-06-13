@@ -14,6 +14,11 @@
                         <div class="flex items-center gap-2 text-sm text-[#0066FF]">
                             <i data-lucide="database" class="w-4 h-4"></i>
                             <span>Lihat Data Mentah (Sebelum Normalisasi)</span>
+                            @if($loaded && $dataSiswa)
+                                <span class="ml-2 px-2.5 py-0.5 bg-blue-50 text-[#0066FF] text-[10px] font-bold rounded-full border border-blue-100">
+                                    {{ $dataSiswa->total() }} Data
+                                </span>
+                            @endif
                         </div>
                         <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform"></i>
                     </summary>
@@ -262,10 +267,10 @@
                     </div>
                     
                     <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3 border-t border-gray-100">
-                        <button class="px-5 py-2 bg-white border border-gray-200 text-gray-600 text-sm font-semibold rounded-lg hover:bg-gray-50 transition-all shadow-sm">
-                            <i data-lucide="printer" class="w-4 h-4 inline mr-1"></i> Cetak PDF
-                        </button>
-                        <button class="px-6 py-2 bg-[#0066FF] text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-all shadow-md">
+                        <a href="{{ route('admin.laporan') }}" id="btn-lihat-laporan" class="px-5 py-2 bg-white border border-gray-200 text-gray-600 text-sm font-semibold rounded-lg hover:bg-gray-50 transition-all shadow-sm inline-flex items-center" style="display:none;">
+                            <i data-lucide="file-text" class="w-4 h-4 inline mr-1"></i> Lihat Laporan Hasil
+                        </a>
+                        <button id="btn-simpan-klaster" class="px-6 py-2 bg-[#0066FF] text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-all shadow-md inline-flex items-center" style="display:none;">
                             <i data-lucide="save" class="w-4 h-4 inline mr-1"></i> Simpan Hasil Klastering
                         </button>
                     </div>
@@ -291,27 +296,27 @@
             
             <div class="space-y-2.5 text-sm text-gray-600 font-medium">
                 <label class="flex items-center space-x-3 cursor-pointer p-1 rounded hover:bg-gray-50">
-                    <input type="checkbox" id="cb-e" name="cb_e" value="1" {{ request('cb_e', '1') == '1' ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
+                    <input type="checkbox" id="cb-e" name="cb_e" value="1" {{ (!request()->has('load') || request('cb_e') == '1') ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
                     <span>(E) Gejala Emosi</span>
                 </label>
                 <label class="flex items-center space-x-3 cursor-pointer p-1 rounded hover:bg-gray-50">
-                    <input type="checkbox" id="cb-c" name="cb_c" value="1" {{ request('cb_c', '1') == '1' ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
+                    <input type="checkbox" id="cb-c" name="cb_c" value="1" {{ (!request()->has('load') || request('cb_c') == '1') ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
                     <span>(C) Masalah Perilaku</span>
                 </label>
                 <label class="flex items-center space-x-3 cursor-pointer p-1 rounded hover:bg-gray-50">
-                    <input type="checkbox" id="cb-h" name="cb_h" value="1" {{ request('cb_h', '1') == '1' ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
+                    <input type="checkbox" id="cb-h" name="cb_h" value="1" {{ (!request()->has('load') || request('cb_h') == '1') ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
                     <span>(H) Hiperaktivitas</span>
                 </label>
                 <label class="flex items-center space-x-3 cursor-pointer p-1 rounded hover:bg-gray-50">
-                    <input type="checkbox" id="cb-p" name="cb_p" value="1" {{ request('cb_p', '1') == '1' ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
+                    <input type="checkbox" id="cb-p" name="cb_p" value="1" {{ (!request()->has('load') || request('cb_p') == '1') ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
                     <span>(P) Masalah Teman Sebaya</span>
                 </label>
                 <label class="flex items-center space-x-3 cursor-pointer p-2 bg-blue-50/50 rounded-lg text-gray-700 border border-blue-100/30">
-                    <input type="checkbox" id="cb-diff" name="cb_diff" value="1" {{ request('cb_diff', '1') == '1' ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
+                    <input type="checkbox" id="cb-diff" name="cb_diff" value="1" {{ (request()->has('load') && request('cb_diff') == '1') ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
                     <span class="font-bold text-[#0066FF]">(Diff) Total Kesulitan</span>
                 </label>
                 <label class="flex items-center space-x-3 cursor-pointer p-1 rounded hover:bg-gray-50">
-                    <input type="checkbox" id="cb-pr" name="cb_pr" value="1" {{ request('cb_pr', '1') == '1' ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
+                    <input type="checkbox" id="cb-pr" name="cb_pr" value="1" {{ (!request()->has('load') || request('cb_pr') == '1') ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
                     <span>(Pr) Prososial</span>
                 </label>
             </div>
@@ -408,6 +413,8 @@
         const totalDataValue    = document.getElementById('total-data-value');
         const tbodyHasil        = document.getElementById('tbody-hasil-klaster');
         const filterKlaster     = document.getElementById('filter-klaster-tabel');
+        const btnLihatLaporan   = document.getElementById('btn-lihat-laporan');
+        const btnSimpanKlaster  = document.getElementById('btn-simpan-klaster');
 
 
         let scatterChart = null;
@@ -471,6 +478,17 @@
                     // --- (D) TABEL PROFIL KLASTER ---
                     renderProfilKlaster(result.cluster_profiles, K);
                     updateFilterDropdown(K);
+
+                    // --- (E) TAMPILKAN TOMBOL FEEDBACK ---
+                    if (btnSimpanKlaster) {
+                        btnSimpanKlaster.style.display = 'inline-flex';
+                        btnSimpanKlaster.classList.remove('bg-green-500', 'hover:bg-green-600');
+                        btnSimpanKlaster.classList.add('bg-[#0066FF]', 'hover:bg-blue-700');
+                        btnSimpanKlaster.innerHTML = '<i data-lucide="save" class="w-4 h-4 inline mr-1"></i> Simpan Hasil Klastering';
+                        btnSimpanKlaster.disabled = false;
+                    }
+                    if (btnLihatLaporan) btnLihatLaporan.style.display = 'none'; // Sembunyikan laporan sebelum disimpan
+                    lucide.createIcons();
 
                 } else {
                     statusBadge.textContent = 'Status: Gagal';
@@ -714,5 +732,53 @@
             tbody.innerHTML = rows;
         }
 
+        // ===================================================================
+        // (E) FETCH API: TOMBOL SIMPAN KLASTERISASI
+        // ===================================================================
+        if (btnSimpanKlaster) {
+            btnSimpanKlaster.addEventListener('click', async function() {
+                const originalHTML = this.innerHTML;
+                this.innerHTML = '<svg class="animate-spin w-4 h-4 mr-2 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Menyimpan...';
+                this.disabled = true;
+
+                try {
+                    const response = await fetch('/api/simpan-klasterisasi', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        }
+                    });
+
+                    if (!response.ok) {
+                        const errData = await response.json();
+                        throw new Error(errData.message || 'Terjadi kesalahan.');
+                    }
+
+                    const result = await response.json();
+
+                    if (result.status === 'success') {
+                        // Sukses tersimpan
+                        this.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4 inline mr-1"></i> Berhasil Disimpan';
+                        this.classList.remove('bg-[#0066FF]', 'hover:bg-blue-700');
+                        this.classList.add('bg-green-500', 'hover:bg-green-600');
+                        
+                        // Tampilkan tombol lihat laporan
+                        if (btnLihatLaporan) btnLihatLaporan.style.display = 'inline-flex';
+                    } else {
+                        alert('Gagal: ' + (result.message || 'Terjadi kesalahan.'));
+                        this.innerHTML = originalHTML;
+                        this.disabled = false;
+                    }
+                } catch (error) {
+                    console.error('Fetch error:', error);
+                    alert('Error: ' + error.message);
+                    this.innerHTML = originalHTML;
+                    this.disabled = false;
+                } finally {
+                    lucide.createIcons();
+                }
+            });
+        }
     </script>
 @endpush

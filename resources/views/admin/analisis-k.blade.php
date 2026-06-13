@@ -10,7 +10,14 @@
                 {{-- CARD 1: PREVIEW DATA --}}
                 {{-- ============================================================= --}}
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
-                    <h2 class="text-gray-800 font-bold text-base tracking-tight text-[#0066FF]">Preview Data</h2>
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-gray-800 font-bold text-base tracking-tight text-[#0066FF]">Preview Data</h2>
+                        @if($loaded && $dataSiswa)
+                            <span class="px-2.5 py-1 bg-blue-50 text-[#0066FF] text-xs font-bold rounded-full border border-blue-100">
+                                {{ $dataSiswa->total() }} Data
+                            </span>
+                        @endif
+                    </div>
 
                     @if($loaded && $dataSiswa)
                         {{-- STATE: Data sudah di-load --}}
@@ -274,27 +281,27 @@
             
             <div class="space-y-2.5 text-sm text-gray-600 font-medium">
                 <label class="flex items-center space-x-3 cursor-pointer p-1 rounded hover:bg-gray-50">
-                    <input type="checkbox" id="cb-e" name="cb_e" value="1" {{ request('cb_e', '1') == '1' ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
+                    <input type="checkbox" id="cb-e" name="cb_e" value="1" {{ (!request()->has('load') || request('cb_e') == '1') ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
                     <span>(E) Gejala Emosi</span>
                 </label>
                 <label class="flex items-center space-x-3 cursor-pointer p-1 rounded hover:bg-gray-50">
-                    <input type="checkbox" id="cb-c" name="cb_c" value="1" {{ request('cb_c', '1') == '1' ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
+                    <input type="checkbox" id="cb-c" name="cb_c" value="1" {{ (!request()->has('load') || request('cb_c') == '1') ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
                     <span>(C) Masalah Perilaku</span>
                 </label>
                 <label class="flex items-center space-x-3 cursor-pointer p-1 rounded hover:bg-gray-50">
-                    <input type="checkbox" id="cb-h" name="cb_h" value="1" {{ request('cb_h', '1') == '1' ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
+                    <input type="checkbox" id="cb-h" name="cb_h" value="1" {{ (!request()->has('load') || request('cb_h') == '1') ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
                     <span>(H) Hiperaktivitas</span>
                 </label>
                 <label class="flex items-center space-x-3 cursor-pointer p-1 rounded hover:bg-gray-50">
-                    <input type="checkbox" id="cb-p" name="cb_p" value="1" {{ request('cb_p', '1') == '1' ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
+                    <input type="checkbox" id="cb-p" name="cb_p" value="1" {{ (!request()->has('load') || request('cb_p') == '1') ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
                     <span>(P) Masalah Teman Sebaya</span>
                 </label>
                 <label class="flex items-center space-x-3 cursor-pointer p-2 bg-blue-50/50 rounded-lg text-gray-700 border border-blue-100/30">
-                    <input type="checkbox" id="cb-diff" name="cb_diff" value="1" {{ request('cb_diff', '1') == '1' ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
+                    <input type="checkbox" id="cb-diff" name="cb_diff" value="1" {{ (request()->has('load') && request('cb_diff') == '1') ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
                     <span class="font-bold text-[#0066FF]">(Diff) Total Kesulitan</span>
                 </label>
                 <label class="flex items-center space-x-3 cursor-pointer p-1 rounded hover:bg-gray-50">
-                    <input type="checkbox" id="cb-pr" name="cb_pr" value="1" {{ request('cb_pr', '1') == '1' ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
+                    <input type="checkbox" id="cb-pr" name="cb_pr" value="1" {{ (!request()->has('load') || request('cb_pr') == '1') ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
                     <span>(Pr) Prososial</span>
                 </label>
             </div>

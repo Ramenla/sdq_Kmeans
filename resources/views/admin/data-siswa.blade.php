@@ -199,6 +199,111 @@
         </div>
     </div>
 
+    {{-- ===== MODAL: EXPORT DATA ===== --}}
+    <div id="modal-export" class="modal-overlay">
+        <div class="modal-content bg-white rounded-xl shadow-xl border border-gray-100" style="max-w: 42rem;">
+            <div class="px-6 py-4 flex items-center justify-between border-b border-gray-100 bg-gray-50/50 rounded-t-xl">
+                <h2 class="text-lg font-bold text-gray-800">Export Data Siswa</h2>
+                <button type="button" onclick="closeModal('modal-export')" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form action="{{ route('siswa.export') }}" method="GET" class="p-6 space-y-5">
+                
+                {{-- Ruang Lingkup (Filter) --}}
+                <div>
+                    <h3 class="text-sm font-bold text-gray-800 border-b pb-2 mb-3">Filter Ruang Lingkup</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex flex-col">
+                            <label class="text-xs font-semibold text-gray-500 mb-1">Kelas</label>
+                            <select name="kelas" class="nb-select bg-white">
+                                <option value="">Semua Kelas</option>
+                                @foreach($listKelas as $kls)
+                                    <option value="{{ $kls }}" {{ request('kelas') == $kls ? 'selected' : '' }}>{{ $kls }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="text-xs font-semibold text-gray-500 mb-1">Jenis Kelamin</label>
+                            <select name="jenis_kelamin" class="nb-select bg-white">
+                                <option value="">Semua</option>
+                                <option value="L" {{ request('jenis_kelamin') == 'L' ? 'selected' : '' }}>Laki-laki (L)</option>
+                                <option value="P" {{ request('jenis_kelamin') == 'P' ? 'selected' : '' }}>Perempuan (P)</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="text-xs font-semibold text-gray-500 mb-1">Umur</label>
+                            <select name="umur" class="nb-select bg-white">
+                                <option value="">Semua Umur</option>
+                                @foreach($listUmur as $umr)
+                                    <option value="{{ $umr }}" {{ request('umur') == $umr ? 'selected' : '' }}>{{ $umr }} Tahun</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="text-xs font-semibold text-gray-500 mb-1">Kategori</label>
+                            <select name="kategori" class="nb-select bg-white">
+                                <option value="">Semua Kategori</option>
+                                <option value="Normal" {{ request('kategori') == 'Normal' ? 'selected' : '' }}>Normal</option>
+                                <option value="Borderline" {{ request('kategori') == 'Borderline' ? 'selected' : '' }}>Borderline</option>
+                                <option value="Abnormal" {{ request('kategori') == 'Abnormal' ? 'selected' : '' }}>Abnormal</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col col-span-2">
+                            <label class="text-xs font-semibold text-gray-500 mb-1">Tanggal Pemeriksaan</label>
+                            <select name="date" class="nb-select bg-white">
+                                <option value="">Semua Waktu</option>
+                                @foreach($daftarTanggal as $tgl)
+                                    <option value="{{ $tgl }}" {{ request('date') == $tgl ? 'selected' : '' }}>{{ \Carbon\Carbon::parse($tgl)->isoFormat('D MMMM YYYY') }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Variabel yang diunduh --}}
+                <div>
+                    <h3 class="text-sm font-bold text-gray-800 border-b pb-2 mb-3">Pilih Variabel Kolom</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        @php
+                            $availableColumns = [
+                                'id_siswa' => 'ID Siswa',
+                                'nama_siswa' => 'Nama Siswa',
+                                'kelas' => 'Kelas',
+                                'jenis_kelamin' => 'Jenis Kelamin',
+                                'umur' => 'Umur',
+                                'email' => 'Email',
+                                'no_hp' => 'No HP',
+                                'tanggal_pemeriksaan' => 'Tanggal Pemeriksaan',
+                                'skor_e' => 'Skor E (Emosi)',
+                                'skor_c' => 'Skor C (Perilaku)',
+                                'skor_h' => 'Skor H (Hiperaktif)',
+                                'skor_p' => 'Skor P (Teman)',
+                                'skor_diff' => 'Total Kesulitan',
+                                'skor_pr' => 'Skor Pr (Prososial)',
+                                'kategori' => 'Kategori'
+                            ];
+                        @endphp
+                        @foreach($availableColumns as $key => $label)
+                        <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                            <input type="checkbox" name="columns[]" value="{{ $key }}" class="rounded text-emerald-500 focus:ring-emerald-500 border-gray-300" checked>
+                            <span>{{ $label }}</span>
+                        </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-2">
+                    <button type="button" onclick="closeModal('modal-export')" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors border border-gray-200 shadow-sm">Batal</button>
+                    <button type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors text-sm flex items-center gap-2">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        Unduh Excel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 
             <form action="{{ route('dashboard.guru') }}" method="GET" class="space-y-4 mb-6">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -216,8 +321,11 @@
                         <button type="button" onclick="recalculateKategori()" id="btn-recalculate" class="flex items-center px-2 py-2 bg-white border border-emerald-500 text-emerald-600 text-sm font-semibold rounded-lg hover:bg-emerald-50 transition-all shadow-sm">
                             <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i> Recalculate Kategori
                         </button>
+                        <button type="button" onclick="openModal('modal-export')" class="flex items-center px-4 py-2 bg-white border border-emerald-500 text-emerald-600 text-sm font-semibold rounded-lg hover:bg-emerald-50 transition-all shadow-sm">
+                            <i data-lucide="file-spreadsheet" class="w-4 h-4 mr-2"></i> Export Data
+                        </button>
                         <button type="button" onclick="openModal('modal-import')" class="flex items-center px-4 py-2 bg-white border border-[#0066FF] text-[#0066FF] text-sm font-semibold rounded-lg hover:bg-blue-50 transition-all shadow-sm">
-                            <i data-lucide="download" class="w-4 h-4 mr-2"></i> Import data
+                            <i data-lucide="upload" class="w-4 h-4 mr-2"></i> Import Data
                         </button>
                         <button type="button" onclick="openModal('modal-tambah')" class="bg-[#0066FF] hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors duration-200 flex items-center gap-2">
                             <i data-lucide="plus" class="w-4 h-4"></i> Tambah Data

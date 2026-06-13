@@ -18,7 +18,7 @@
         .nb-input, .nb-select {
             border: 1px solid #e5e7eb;
             border-radius: 0.5rem;
-            background: #f9fafb;
+            background-color: #f9fafb;
             padding: 0.625rem 0.875rem;
             font-size: 0.875rem;
             transition: all 0.2s ease;
@@ -28,7 +28,7 @@
         }
         .nb-input:focus, .nb-select:focus {
             border-color: #3b82f6;
-            background: #fff;
+            background-color: #fff;
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
         .nb-input::placeholder {
@@ -37,10 +37,10 @@
         .nb-select {
             appearance: none;
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 0.75rem center;
+            background-position: right 1rem center;
             background-repeat: no-repeat;
             background-size: 1.25em 1.25em;
-            padding-right: 2.5rem;
+            padding-right: 2.75rem;
         }
         .nb-label {
             font-weight: 500;

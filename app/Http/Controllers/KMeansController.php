@@ -7,9 +7,11 @@ use App\Models\SkorSdq;
 use App\Models\ClusteringHistory;
 use App\Models\ClusterResult;
 use App\Services\ForwardChainingService;
+use App\Exports\ClusteringExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class KMeansController extends Controller
 {
@@ -73,7 +75,7 @@ class KMeansController extends Controller
         $order = strtolower($request->query('order')) === 'desc' ? 'desc' : 'asc';
 
         if ($sortBy === 'id_siswa' || $sortBy === 'nomor') {
-            $query->orderBy('no_hp', $order);
+            $query->orderBy('siswas.id', $order);
         } elseif ($sortBy === 'nama_siswa') {
             $query->orderBy('nama_siswa', $order);
         } elseif (in_array($sortBy, ['skor_diff', 'skor_e', 'skor_c', 'skor_h', 'skor_p', 'skor_pr'])) {
@@ -85,6 +87,9 @@ class KMeansController extends Controller
             // Default sorting: Terbaru (created_at desc)
             $query->orderBy('created_at', 'desc');
         }
+
+        // Tie-breaker: Pastikan urutan selalu deterministik
+        $query->orderBy('siswas.id', 'desc');
 
         return $query;
     }
@@ -103,34 +108,61 @@ class KMeansController extends Controller
     private function getRawSdqData(Request $request)
     {
         // Menggunakan SkorSdq untuk ML agar bisa per riwayat tes
-        $query = SkorSdq::with('siswa');
+        $query = SkorSdq::with('siswa')
+            ->join('siswas', 'skor_sdqs.siswa_id', '=', 'siswas.id')
+            ->select('skor_sdqs.*'); // Pastikan hanya ambil kolom skor
 
-        // Terapkan filter demografi melalui relasi
-        $query->when($request->filled('kelas'), function ($q) use ($request) {
-            $q->whereHas('siswa', function ($sq) use ($request) {
-                $sq->where('kelas', $request->query('kelas'));
+        // Filter: Pencarian nama, id, email, atau no hp
+        $query->when($request->filled('search'), function ($q) use ($request) {
+            $search = $request->query('search');
+            $q->where(function ($uq) use ($search) {
+                $uq->where('siswas.nama_siswa', 'like', '%' . $search . '%')
+                   ->orWhere('siswas.id', 'like', '%' . $search . '%')
+                   ->orWhere('siswas.email', 'like', '%' . $search . '%')
+                   ->orWhere('siswas.no_hp', 'like', '%' . $search . '%');
             });
+        });
+
+        // Filter demografi melalui join siswas
+        $query->when($request->filled('kelas'), function ($q) use ($request) {
+            $q->where('siswas.kelas', $request->query('kelas'));
         });
 
         $query->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
-            $q->whereHas('siswa', function ($sq) use ($request) {
-                $sq->where('jenis_kelamin', $request->query('jenis_kelamin'));
-            });
+            $q->where('siswas.jenis_kelamin', $request->query('jenis_kelamin'));
         });
 
         $query->when($request->filled('umur'), function ($q) use ($request) {
-            $q->whereHas('siswa', function ($sq) use ($request) {
-                $sq->where('umur', $request->query('umur'));
-            });
+            $q->where('siswas.umur', $request->query('umur'));
         });
 
+        // Filter data SkorSdq
         $query->when($request->filled('date'), function ($q) use ($request) {
-            $q->whereDate('tanggal_pemeriksaan', $request->query('date'));
+            $q->whereDate('skor_sdqs.tanggal_pemeriksaan', $request->query('date'));
         });
 
         $query->when($request->filled('kategori'), function ($q) use ($request) {
-            $q->where('kategori', $request->query('kategori'));
+            $q->where('skor_sdqs.kategori', $request->query('kategori'));
         });
+
+        // Sorting Kolom agar sesuai tabel preview
+        $sortBy = $request->query('sort_by');
+        $order = strtolower($request->query('order')) === 'desc' ? 'desc' : 'asc';
+
+        if ($sortBy === 'id_siswa' || $sortBy === 'nomor') {
+            $query->orderBy('siswas.id', $order);
+        } elseif ($sortBy === 'nama_siswa') {
+            $query->orderBy('siswas.nama_siswa', $order);
+        } elseif (in_array($sortBy, ['skor_diff', 'skor_e', 'skor_c', 'skor_h', 'skor_p', 'skor_pr'])) {
+            $query->orderBy('skor_sdqs.' . $sortBy, $order);
+        } else {
+            // Default sorting untuk siswa adalah created_at desc (dari buildSiswaQuery)
+            // Jadi kita samakan dengan siswas.created_at
+            $query->orderBy('siswas.created_at', 'desc');
+        }
+
+        // Tie-breaker: Pastikan urutan selalu deterministik, persis dengan tabel preview
+        $query->orderBy('siswas.id', 'desc');
 
         return $query->get();
     }
@@ -146,11 +178,9 @@ class KMeansController extends Controller
     {
         $columns = [];
 
-        // Jika tidak ada parameter checkbox sama sekali (akses pertama kali),
+        // Jika ini adalah load pertama (tidak ada parameter 'load'),
         // default: semua 5 subskala aktif (tanpa Diff)
-        $hasAnyCheckbox = $request->hasAny(['cb_e', 'cb_c', 'cb_h', 'cb_p', 'cb_diff', 'cb_pr']);
-
-        if (!$hasAnyCheckbox) {
+        if (!$request->has('load')) {
             return ['skor_e', 'skor_c', 'skor_h', 'skor_p', 'skor_pr'];
         }
 
@@ -468,6 +498,52 @@ class KMeansController extends Controller
         }
     }
 
+    /**
+     * Menyimpan hasil klasterisasi dari session ke database
+     */
+    public function simpanKlasterisasi()
+    {
+        $pending = session('pending_clustering');
+
+        if (!$pending) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Tidak ada data klasterisasi yang perlu disimpan.'
+            ], 400);
+        }
+
+        try {
+            $history = ClusteringHistory::create([
+                'nama_klastering' => $pending['nama_klastering'],
+                'jumlah_k'        => $pending['jumlah_k'],
+                'filter_kelas'    => $pending['filter_kelas'],
+                'filter_jk'       => $pending['filter_jk'],
+            ]);
+
+            foreach ($pending['hasil_klaster'] as $item) {
+                ClusterResult::create([
+                    'clustering_history_id' => $history->id,
+                    'skor_sdq_id'           => $item['skor_sdq_id'],
+                    'cluster_number'        => $item['cluster_number'],
+                ]);
+            }
+
+            // Hapus dari session setelah berhasil disimpan
+            session()->forget('pending_clustering');
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Data klasterisasi berhasil disimpan.'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Gagal menyimpan klasterisasi', ['error' => $e->getMessage()]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal menyimpan ke database: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     // =============================================================
     //  API 3: K-Means Clustering
     // =============================================================
@@ -556,33 +632,24 @@ class KMeansController extends Controller
                 }
                 ksort($clusterCounts);
 
-                // Simpan riwayat klasterisasi ke database
                 $namaKlastering = $request->input('nama_klastering');
                 if (empty($namaKlastering)) {
                     $namaKlastering = 'Klasterisasi K=' . $jumlahK . ' — ' . now()->format('d M Y H:i');
                 }
 
-                $history = ClusteringHistory::create([
+                // Simpan sementara di session (web route) untuk nanti disimpan jika diklik
+                session()->put('pending_clustering', [
                     'nama_klastering' => $namaKlastering,
                     'jumlah_k'        => $jumlahK,
-                    'filter_kelas'    => $request->input('filter_kelas'),
-                    'filter_jk'       => $request->input('filter_jk'),
+                    'filter_kelas'    => $request->input('kelas'),
+                    'filter_jk'       => $request->input('jenis_kelamin'),
+                    'hasil_klaster'   => $hasilKlaster,
                 ]);
-
-                // Simpan detail hasil per skor
-                foreach ($hasilKlaster as $item) {
-                    ClusterResult::create([
-                        'clustering_history_id' => $history->id,
-                        'skor_sdq_id'           => $item['skor_sdq_id'],
-                        'cluster_number'        => $item['cluster_number'],
-                    ]);
-                }
 
                 return response()->json([
                     'status'                 => 'success',
-                    'message'                => $result['message'] ?? 'Klasterisasi berhasil.',
+                    'message'                => $result['message'] ?? 'Klasterisasi berhasil. Silakan klik Simpan untuk menyimpan ke database.',
                     'jumlah_klaster'         => $jumlahK,
-                    'clustering_history_id'  => $history->id,
                     'centroids'              => $result['centroids'] ?? [],
                     'inertia'                => $result['inertia'] ?? null,
                     'n_iter'                 => $result['n_iter'] ?? null,
@@ -649,5 +716,72 @@ class KMeansController extends Controller
                 'message' => 'Gagal menjalankan Forward Chaining: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    // =============================================================
+    //  HALAMAN: Laporan Hasil Klasterisasi
+    // =============================================================
+
+    /**
+     * Tampilkan halaman Laporan Hasil Klasterisasi.
+     */
+    public function indexLaporan(Request $request)
+    {
+        $query = ClusteringHistory::withCount('results');
+
+        // Pencarian nama laporan
+        $query->when($request->filled('search'), function ($q) use ($request) {
+            $q->where('nama_klastering', 'like', '%' . $request->query('search') . '%');
+        });
+
+        // Sorting
+        $order = $request->query('order', 'desc');
+        $query->orderBy('created_at', $order === 'asc' ? 'asc' : 'desc');
+
+        $laporanList = $query->paginate(10);
+
+        return view('admin.laporan-hasil', compact('laporanList'));
+    }
+
+    /**
+     * Export Excel hasil klasterisasi berdasarkan history ID.
+     */
+    public function exportExcel(ClusteringHistory $history)
+    {
+        $filename = 'Laporan_' . str_replace(' ', '_', $history->nama_klastering) . '.xlsx';
+        return Excel::download(new ClusteringExport($history), $filename);
+    }
+
+    /**
+     * Hapus riwayat klasterisasi beserta detail hasilnya.
+     */
+    public function destroyHistory(ClusteringHistory $history)
+    {
+        $nama = $history->nama_klastering;
+        $history->results()->delete();
+        $history->delete();
+
+        return redirect()->route('admin.laporan')
+            ->with('success', "Laporan \"{$nama}\" berhasil dihapus.");
+    }
+
+    /**
+     * Hapus beberapa riwayat klasterisasi sekaligus (bulk delete).
+     */
+    public function bulkDestroyHistory(Request $request)
+    {
+        $ids = $request->input('ids', []);
+
+        if (empty($ids)) {
+            return redirect()->route('admin.laporan')
+                ->with('error', 'Tidak ada laporan yang dipilih.');
+        }
+
+        // Hapus semua detail hasil terlebih dahulu
+        ClusterResult::whereIn('clustering_history_id', $ids)->delete();
+        $count = ClusteringHistory::whereIn('id', $ids)->delete();
+
+        return redirect()->route('admin.laporan')
+            ->with('success', "{$count} laporan berhasil dihapus.");
     }
 }

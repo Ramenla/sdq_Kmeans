@@ -79,15 +79,17 @@
         @endfor
     </form>
 
-    <div class="max-w-2xl mx-auto px-4 py-8 md:py-12">
+    <div class="w-full">
 
         {{-- Server Validation Errors --}}
         @if($errors->any())
-            <div class="bg-red-50 rounded-xl p-4 mb-6">
-                <div class="flex items-start gap-2.5">
-                    <svg class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
-                    <div class="text-sm text-red-700">
-                        @foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach
+            <div class="max-w-2xl mx-auto px-4 pt-8 md:pt-12">
+                <div class="bg-red-50 rounded-xl p-4 mb-6">
+                    <div class="flex items-start gap-2.5">
+                        <svg class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+                        <div class="text-sm text-red-700">
+                            @foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach
+                        </div>
                     </div>
                 </div>
             </div>
@@ -97,6 +99,7 @@
         {{--  STEP 1: DATA DIRI SISWA                                      --}}
         {{-- ============================================================ --}}
         <div id="step-identity" class="step-panel active">
+            <div class="max-w-2xl mx-auto px-4 py-8 md:py-12">
 
             {{-- Page Header (outside card) --}}
             <div id="pageHeader" class="text-center mb-8">
@@ -184,12 +187,14 @@
                     Mulai Kuisioner
                 </button>
             </div>
+            </div>
         </div>
 
         {{-- ============================================================ --}}
         {{--  STEP 2: KUESIONER PER SOAL                                   --}}
         {{-- ============================================================ --}}
         <div id="step-quiz" class="step-panel">
+            <div class="max-w-4xl mx-auto px-4 min-h-screen flex flex-col justify-center pb-20 md:pb-32 pt-10">
 
             {{-- Progress Bar --}}
             <div id="progressArea" class="mb-10">
@@ -206,24 +211,25 @@
             <div id="questionContainer" class="mb-10"></div>
 
             {{-- Navigation --}}
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between mt-8">
                 <button type="button" id="btnPrev"
-                    class="hidden items-center gap-2 px-5 py-2.5 bg-white text-[#0066FF] font-semibold text-sm rounded-lg hover:bg-blue-50 transition-colors">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                    class="hidden items-center gap-2 px-6 py-3 bg-white text-[#0066FF] font-semibold text-base rounded-xl hover:bg-blue-50 transition-colors shadow-sm border border-gray-100">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
                     Sebelumnya
                 </button>
                 <div class="ml-auto">
                     <button type="button" id="btnNext"
-                        class="hidden items-center gap-2 px-5 py-2.5 bg-[#0066FF] hover:bg-blue-700 text-white font-semibold text-sm rounded-lg transition-colors">
+                        class="hidden items-center gap-2 px-6 py-3 bg-[#0066FF] hover:bg-blue-700 text-white font-semibold text-base rounded-xl transition-colors shadow-md">
                         Selanjutnya
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                     </button>
                     <button type="button" id="btnFinish"
-                        class="hidden items-center gap-2 px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm rounded-lg transition-colors">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                        Finish Attempt
+                        class="hidden items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-base rounded-xl transition-colors shadow-md">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        Selesai
                     </button>
                 </div>
+            </div>
             </div>
         </div>
 
@@ -314,26 +320,26 @@
 
             questionContainer.innerHTML = `
                 <div class="q-card">
-                    <p class="text-xl md:text-2xl font-bold text-gray-900 text-center leading-snug mb-8">${q.text}</p>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="answersGrid">
+                    <p class="text-3xl md:text-5xl font-bold text-gray-900 text-center leading-tight mb-12">${q.text}</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6" id="answersGrid">
                         ${opts.map(o => {
                             const isSelected = sel === o.value;
-                            const cardBg     = isSelected ? 'bg-blue-100 border-blue-200' : 'bg-white border-gray-200';
+                            const cardBg     = isSelected ? 'bg-blue-100 border-blue-200 shadow-md scale-105' : 'bg-white border-gray-200 shadow-sm';
                             const circleStyle = isSelected
                                 ? 'bg-[#0066FF] text-white'
                                 : 'border-2 border-gray-300 text-gray-400';
                             const icon        = isSelected ? iconCheck : o.iconDefault;
-                            const textColor   = isSelected ? 'text-[#0066FF]' : 'text-gray-700';
+                            const textColor   = isSelected ? 'text-[#0066FF] font-bold' : 'text-gray-700';
 
                             return `
                                 <button type="button"
-                                    class="answer-card cursor-pointer border rounded-xl p-5 flex flex-col items-center gap-3 ${cardBg}"
+                                    class="answer-card cursor-pointer border rounded-2xl p-8 flex flex-col items-center gap-5 transition-all duration-300 ${cardBg}"
                                     data-value="${o.value}"
                                     onclick="window.__selectAnswer(${num}, ${o.value})">
-                                    <div class="w-11 h-11 rounded-full flex items-center justify-center ${circleStyle}">
+                                    <div class="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center ${circleStyle}">
                                         ${icon}
                                     </div>
-                                    <span class="text-sm font-semibold ${textColor}">${o.label}</span>
+                                    <span class="text-lg md:text-xl font-semibold ${textColor}">${o.label}</span>
                                 </button>
                             `;
                         }).join('')}

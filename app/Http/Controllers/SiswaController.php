@@ -162,4 +162,19 @@ class SiswaController extends Controller
             return redirect()->route('dashboard.guru')->with('error', 'Gagal mengimport data: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Export data siswa ke Excel dengan filter.
+     */
+    public function export(Request $request)
+    {
+        $filters = $request->only(['kelas', 'jenis_kelamin', 'umur', 'kategori', 'date']);
+        $columns = $request->input('columns', []);
+        
+        if (empty($columns)) {
+            return redirect()->back()->with('error', 'Silakan pilih setidaknya satu variabel untuk diunduh.');
+        }
+
+        return Excel::download(new \App\Exports\DataSiswaExport($filters, $columns), 'Data_Siswa_' . date('Ymd_His') . '.xlsx');
+    }
 }
