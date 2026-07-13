@@ -3,15 +3,6 @@
 
 @section('content')
     <div class="space-y-6">
-
-        {{-- Header --}}
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-                <h1 class="text-xl font-bold text-gray-800">Laporan Hasil Klasterisasi</h1>
-                <p class="text-sm text-gray-400 mt-1">Riwayat seluruh proses klasterisasi K-Means yang telah disimpan.</p>
-            </div>
-        </div>
-
         {{-- Search & Sort Bar --}}
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div class="flex items-center gap-3">

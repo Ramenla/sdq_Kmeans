@@ -12,9 +12,9 @@ class DatabaseSeeder extends Seeder
     {
         // 1. Buat Akun Khusus Guru BK (Sesuai role baru Anda)
         User::create([
-            'name' => 'Fauzan (Guru BK)',
-            'email' => 'admin@sekolah.com',
-            'password' => bcrypt('admin123'), // Password untuk login nanti
+            'name' => 'Guru BK',
+            'email' => 'admin@email.com',
+            'password' => bcrypt('admin123'), // Password untuk login 
         ]);
     }
 }

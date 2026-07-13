@@ -5,6 +5,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\KMeansController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\KuesionerController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LaporanController;
 
 // --- RUTE HALAMAN UTAMA (LANDING PAGE) ---
 Route::get('/', function () {
@@ -24,32 +26,40 @@ Route::get('/login-guru', [AuthController::class, 'showLoginGuru'])->name('login
 Route::post('/login', [AuthController::class, 'processLogin']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// --- RUTE DASHBOARD ---
+// ==============================================================================
+// --- RUTE PROTECTED (BUTUH LOGIN) ---
+// ==============================================================================
+Route::middleware('auth')->group(function () {
+    
+    // --- RUTE DASHBOARD ---
+    Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/dashboard-guru', [SiswaController::class, 'index'])->name('dashboard.guru');
 
-Route::get('/dashboard-guru', [KMeansController::class, 'indexDataSiswa'])->name('dashboard.guru');
+    // --- RUTE CRUD DATA SISWA ---
+    Route::delete('/siswa/bulk-delete', [SiswaController::class, 'bulkDestroy'])->name('siswa.bulkDestroy');
+    Route::post('/siswa', [SiswaController::class, 'store'])->name('siswa.store');
+    Route::put('/siswa/{siswa}', [SiswaController::class, 'update'])->name('siswa.update');
+    Route::delete('/siswa/{siswa}', [SiswaController::class, 'destroy'])->name('siswa.destroy');
+    Route::post('/data-siswa/import', [SiswaController::class, 'import'])->name('siswa.import');
+    Route::get('/data-siswa/export', [SiswaController::class, 'export'])->name('siswa.export');
 
-// --- RUTE CRUD DATA SISWA ---
-Route::delete('/siswa/bulk-delete', [SiswaController::class, 'bulkDestroy'])->name('siswa.bulkDestroy');
-Route::post('/siswa', [SiswaController::class, 'store'])->name('siswa.store');
-Route::put('/siswa/{siswa}', [SiswaController::class, 'update'])->name('siswa.update');
-Route::delete('/siswa/{siswa}', [SiswaController::class, 'destroy'])->name('siswa.destroy');
-Route::post('/data-siswa/import', [SiswaController::class, 'import'])->name('siswa.import');
-Route::get('/data-siswa/export', [SiswaController::class, 'export'])->name('siswa.export');
+    // --- RUTE HALAMAN ADMIN LAINNYA ---
+    Route::get('/admin/analisis-k', [KMeansController::class, 'indexAnalisis'])->name('admin.analisis');
+    Route::get('/admin/klasterisasi', [KMeansController::class, 'indexKlasterisasi'])->name('admin.klasterisasi');
+    
+    // --- RUTE LAPORAN HASIL KLASTERISASI ---
+    Route::get('/admin/laporan-hasil', [LaporanController::class, 'indexLaporan'])->name('admin.laporan');
+    Route::get('/admin/laporan-hasil/{history}/export-excel', [LaporanController::class, 'exportExcel'])->name('admin.laporan.export');
+    Route::delete('/admin/laporan-hasil/bulk-delete', [LaporanController::class, 'bulkDestroyHistory'])->name('admin.laporan.bulkDestroy');
+    Route::delete('/admin/laporan-hasil/{history}', [LaporanController::class, 'destroyHistory'])->name('admin.laporan.destroy');
 
-Route::get('/admin/analisis-k', [KMeansController::class, 'indexAnalisis'])->name('admin.analisis');
+    // --- RUTE API UNTUK KOMUNIKASI DENGAN SERVER PYTHON ML ---
+    Route::get('/api/preprocess', [KMeansController::class, 'getPreprocessData'])->name('api.preprocess');
+    Route::get('/api/elbow', [KMeansController::class, 'getElbowData'])->name('api.elbow');
+    Route::post('/api/klasterisasi', [KMeansController::class, 'prosesKlasterisasi'])->name('api.klasterisasi');
+    Route::post('/api/simpan-klasterisasi', [KMeansController::class, 'simpanKlasterisasi'])->name('api.simpanKlasterisasi');
 
-Route::get('/admin/klasterisasi', [KMeansController::class, 'indexKlasterisasi'])->name('admin.klasterisasi');
-
-Route::get('/admin/laporan-hasil', [KMeansController::class, 'indexLaporan'])->name('admin.laporan');
-Route::get('/admin/laporan-hasil/{history}/export-excel', [KMeansController::class, 'exportExcel'])->name('admin.laporan.export');
-Route::delete('/admin/laporan-hasil/bulk-delete', [KMeansController::class, 'bulkDestroyHistory'])->name('admin.laporan.bulkDestroy');
-Route::delete('/admin/laporan-hasil/{history}', [KMeansController::class, 'destroyHistory'])->name('admin.laporan.destroy');
-
-// --- RUTE API UNTUK KOMUNIKASI DENGAN SERVER PYTHON ML ---
-Route::get('/api/preprocess', [KMeansController::class, 'getPreprocessData'])->name('api.preprocess');
-Route::get('/api/elbow', [KMeansController::class, 'getElbowData'])->name('api.elbow');
-Route::post('/api/klasterisasi', [KMeansController::class, 'prosesKlasterisasi'])->name('api.klasterisasi');
-Route::post('/api/simpan-klasterisasi', [KMeansController::class, 'simpanKlasterisasi'])->name('api.simpanKlasterisasi');
-
-// --- RUTE API FORWARD CHAINING ---
-Route::post('/api/recalculate-kategori', [KMeansController::class, 'recalculateKategori'])->name('api.recalculateKategori');
+    // --- RUTE API FORWARD CHAINING ---
+    Route::post('/api/recalculate-kategori', [KMeansController::class, 'recalculateKategori'])->name('api.recalculateKategori');
+    
+});

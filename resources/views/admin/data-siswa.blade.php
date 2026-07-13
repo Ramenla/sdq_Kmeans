@@ -3,24 +3,24 @@
 
 @section('content')
     {{-- ===== MODAL: TAMBAH DATA SISWA ===== --}}
-    <div id="modal-tambah" class="modal-overlay">
-        <div class="modal-content bg-white rounded-xl shadow-xl border border-gray-100">
-            <div class="px-6 py-4 flex items-center justify-between border-b border-gray-100 bg-gray-50/50 rounded-t-xl">
-                <h2 class="text-lg font-bold text-gray-800">Tambah Data Siswa</h2>
-                <button type="button" onclick="closeModal('modal-tambah')" class="text-gray-400 hover:text-gray-600 transition-colors">
-                    <i data-lucide="x" class="w-5 h-5"></i>
+    <div id="modal-tambah" class="modal-overlay bg-black/60 backdrop-blur-none flex items-center justify-center p-4">
+        <div class="modal-content bg-white rounded-xl shadow-xl border-0 w-full flex flex-col" style="max-width: 48rem; max-height: 90vh;">
+            <div class="px-8 py-6 flex items-center justify-between border-b border-gray-100 shrink-0">
+                <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Tambah Data Siswa</h2>
+                <button type="button" onclick="closeModal('modal-tambah')" class="text-gray-400 hover:text-gray-900 transition-colors focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <form action="{{ route('siswa.store') }}" method="POST" class="p-6 space-y-4">
+            <form action="{{ route('siswa.store') }}" method="POST" class="p-5 overflow-y-auto space-y-2">
                 @csrf
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="nb-label">No HP <span class="text-red-500">*</span></label>
-                        <input type="text" name="no_hp" class="nb-input" placeholder="Contoh: 0812345678" value="{{ old('no_hp') }}" required>
-                    </div>
-                    <div>
                         <label class="nb-label">Nama Lengkap <span class="text-red-500">*</span></label>
                         <input type="text" name="name" class="nb-input" placeholder="Nama siswa" value="{{ old('name') }}" required>
+                    </div>
+                    <div>
+                        <label class="nb-label">No HP <span class="text-red-500">*</span></label>
+                        <input type="text" name="no_hp" class="nb-input" placeholder="Contoh: 0812345678" value="{{ old('no_hp') }}" required>
                     </div>
                 </div>
                 <div>
@@ -76,9 +76,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-2">
-                    <button type="button" onclick="closeModal('modal-tambah')" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors border border-gray-200">Batal</button>
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors text-sm">
+                <div class="flex justify-end gap-3 pt-6 border-t border-gray-100 mt-4">
+                    <button type="button" onclick="closeModal('modal-tambah')" class="px-5 py-2.5 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 border border-gray-300 rounded-lg transition-colors focus:outline-none">Batal</button>
+                    <button type="submit" class="bg-[#0066FF] hover:bg-blue-700 text-white font-semibold px-5 py-2.5 rounded-lg shadow-sm transition-colors text-sm focus:outline-none">
                         Simpan Data
                     </button>
                 </div>
@@ -87,25 +87,25 @@
     </div>
 
     {{-- ===== MODAL: EDIT DATA SISWA ===== --}}
-    <div id="modal-edit" class="modal-overlay">
-        <div class="modal-content bg-white rounded-xl shadow-xl border border-gray-100">
-            <div class="px-6 py-4 flex items-center justify-between border-b border-gray-100 bg-gray-50/50 rounded-t-xl">
-                <h2 class="text-lg font-bold text-gray-800">Edit Data Siswa</h2>
-                <button type="button" onclick="closeModal('modal-edit')" class="text-gray-400 hover:text-gray-600 transition-colors">
-                    <i data-lucide="x" class="w-5 h-5"></i>
+    <div id="modal-edit" class="modal-overlay bg-black/60 backdrop-blur-none flex items-center justify-center p-4">
+        <div class="modal-content bg-white rounded-xl shadow-xl border-0 w-full flex flex-col" style="max-width: 48rem; max-height: 90vh;">
+            <div class="px-8 py-6 flex items-center justify-between border-b border-gray-100 shrink-0">
+                <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Edit Data Siswa</h2>
+                <button type="button" onclick="closeModal('modal-edit')" class="text-gray-400 hover:text-gray-900 transition-colors focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <form id="form-edit" action="" method="POST" class="p-6 space-y-4">
+            <form id="form-edit" action="" method="POST" class="p-5 overflow-y-auto space-y-2">
                 @csrf
                 @method('PUT')
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="nb-label">No HP <span class="text-red-500">*</span></label>
-                        <input type="text" name="no_hp" id="edit-no_hp" class="nb-input" required>
-                    </div>
-                    <div>
                         <label class="nb-label">Nama Lengkap <span class="text-red-500">*</span></label>
                         <input type="text" name="name" id="edit-name" class="nb-input" required>
+                    </div>
+                    <div>
+                        <label class="nb-label">No HP <span class="text-red-500">*</span></label>
+                        <input type="text" name="no_hp" id="edit-no_hp" class="nb-input" required>
                     </div>
                 </div>
                 <div>
@@ -161,9 +161,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-2">
-                    <button type="button" onclick="closeModal('modal-edit')" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors border border-gray-200">Batal</button>
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors text-sm">
+                <div class="flex justify-end gap-3 pt-6 border-t border-gray-100 mt-4">
+                    <button type="button" onclick="closeModal('modal-edit')" class="px-5 py-2.5 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 border border-gray-300 rounded-lg transition-colors focus:outline-none">Batal</button>
+                    <button type="submit" class="bg-[#0066FF] hover:bg-blue-700 text-white font-semibold px-5 py-2.5 rounded-lg shadow-sm transition-colors text-sm focus:outline-none">
                         Update Data
                     </button>
                 </div>
@@ -172,12 +172,12 @@
     </div>
 
     {{-- ===== MODAL: IMPORT DATA ===== --}}
-    <div id="modal-import" class="modal-overlay">
-        <div class="modal-content bg-white rounded-xl shadow-xl border border-gray-100" style="max-w: 28rem;">
-            <div class="px-6 py-4 flex items-center justify-between border-b border-gray-100 bg-gray-50/50 rounded-t-xl">
-                <h2 class="text-lg font-bold text-gray-800">Import Data SDQ</h2>
-                <button type="button" onclick="closeModal('modal-import')" class="text-gray-400 hover:text-gray-600 transition-colors">
-                    <i data-lucide="x" class="w-5 h-5"></i>
+    <div id="modal-import" class="modal-overlay bg-black/60 backdrop-blur-none flex items-center justify-center p-4">
+        <div class="modal-content bg-white rounded-xl shadow-xl border-0 w-full flex flex-col" style="max-width: 28rem; max-height: 90vh;">
+            <div class="px-8 py-6 flex items-center justify-between border-b border-gray-100 shrink-0">
+                <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Import Data SDQ</h2>
+                <button type="button" onclick="closeModal('modal-import')" class="text-gray-400 hover:text-gray-900 transition-colors focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
             <form action="{{ route('siswa.import') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
@@ -200,12 +200,12 @@
     </div>
 
     {{-- ===== MODAL: EXPORT DATA ===== --}}
-    <div id="modal-export" class="modal-overlay">
-        <div class="modal-content bg-white rounded-xl shadow-xl border border-gray-100" style="max-w: 42rem;">
-            <div class="px-6 py-4 flex items-center justify-between border-b border-gray-100 bg-gray-50/50 rounded-t-xl">
-                <h2 class="text-lg font-bold text-gray-800">Export Data Siswa</h2>
-                <button type="button" onclick="closeModal('modal-export')" class="text-gray-400 hover:text-gray-600 transition-colors">
-                    <i data-lucide="x" class="w-5 h-5"></i>
+    <div id="modal-export" class="modal-overlay bg-black/60 backdrop-blur-none flex items-center justify-center p-4">
+        <div class="modal-content bg-white rounded-xl shadow-xl border-0 w-full flex flex-col" style="max-width: 42rem; max-height: 90vh;">
+            <div class="px-8 py-6 flex items-center justify-between border-b border-gray-100 shrink-0">
+                <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Export Data Siswa</h2>
+                <button type="button" onclick="closeModal('modal-export')" class="text-gray-400 hover:text-gray-900 transition-colors focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
             <form action="{{ route('siswa.export') }}" method="GET" class="p-6 space-y-5">
@@ -304,8 +304,8 @@
         </div>
     </div>
 
-
-            <form action="{{ route('dashboard.guru') }}" method="GET" class="space-y-4 mb-6">
+    {{-- ===== MODAL: DETAIL SISWA (FLAT DESIGN) ===== --}}
+    <x-modal-detail-siswa />            <form action="{{ route('dashboard.guru') }}" method="GET" class="space-y-4 mb-1">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div class="flex shadow-sm rounded-lg overflow-hidden border border-gray-200 bg-white">
                         <div class="pl-3 flex items-center">
@@ -552,6 +552,31 @@
                                     </td>
                                     <td class="px-2 py-2.5">
                                         <div class="flex justify-center items-center gap-2">
+                                            {{-- Tombol Detail --}}
+                                            <button type="button" 
+                                                data-detail="{{ json_encode([
+                                                    'nama' => $data->nama_siswa ?? '-',
+                                                    'kelas' => $data->kelas ?? '-',
+                                                    'umur' => $data->umur ? $data->umur . ' Tahun' : '-',
+                                                    'jk' => $data->jenis_kelamin == 'L' ? 'Laki-laki' : ($data->jenis_kelamin == 'P' ? 'Perempuan' : '-'),
+                                                    'hp' => $data->no_hp ?? '-',
+                                                    'email' => $data->email ?? '-',
+                                                    'skor_e' => $skor->skor_e ?? '-', 'kategori_e' => $skor->kategori_e ?? '-',
+                                                    'skor_c' => $skor->skor_c ?? '-', 'kategori_c' => $skor->kategori_c ?? '-',
+                                                    'skor_h' => $skor->skor_h ?? '-', 'kategori_h' => $skor->kategori_h ?? '-',
+                                                    'skor_p' => $skor->skor_p ?? '-', 'kategori_p' => $skor->kategori_p ?? '-',
+                                                    'skor_pr' => $skor->skor_pr ?? '-', 'kategori_pr' => $skor->kategori_pr ?? '-',
+                                                    'tanggal' => $skor && $skor->tanggal_pemeriksaan ? \Carbon\Carbon::parse($skor->tanggal_pemeriksaan)->isoFormat('D MMMM YYYY') : '-',
+                                                    'total' => $skor->skor_diff ?? '-',
+                                                    'kategori' => $skor->kategori ?? '-'
+                                                ]) }}"
+                                                onclick="openDetailModal(this)"
+                                                class="bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium px-2 py-1 rounded-md shadow-sm transition-colors duration-200 flex items-center gap-1 text-sm focus:outline-none"
+                                                title="Lihat Detail">
+                                                <i data-lucide="eye" class="w-3 h-3"></i>
+                                                Detail
+                                            </button>
+
                                             {{-- Tombol Edit --}}
                                             <button type="button"
                                                 onclick="openEditModal({{ $data->id }}, '{{ addslashes($data->no_hp ?? '') }}', '{{ addslashes($data->nama_siswa ?? '') }}', '{{ addslashes($data->email ?? '') }}', '{{ addslashes($data->kelas ?? '') }}', '{{ $data->jenis_kelamin ?? '' }}', '{{ $data->umur ?? '' }}', '{{ $skor->tanggal_pemeriksaan ?? '' }}', '{{ $skor->skor_e ?? '' }}', '{{ $skor->skor_c ?? '' }}', '{{ $skor->skor_h ?? '' }}', '{{ $skor->skor_p ?? '' }}', '{{ $skor->skor_pr ?? '' }}')"
@@ -729,6 +754,74 @@
             btn.disabled = false;
             if (typeof lucide !== 'undefined') lucide.createIcons();
         });
+    }
+
+    function getStatusColor(status) {
+        let base = 'w-1/3 text-right text-xs font-bold uppercase ';
+        if (status === 'Abnormal') return base + 'text-red-600';
+        if (status === 'Borderline') return base + 'text-yellow-600';
+        return base + 'text-blue-600';
+    }
+
+    function getStatusColorTable(status) {
+        if (status === 'Abnormal') return 'text-red-600';
+        if (status === 'Borderline') return 'text-yellow-600';
+        if (status === '-' || !status) return 'text-gray-500';
+        return 'text-blue-600';
+    }
+
+    function openDetailModal(btn) {
+        let data = JSON.parse(btn.getAttribute('data-detail'));
+        
+        // Biodata
+        document.getElementById('md-nama').innerText = data.nama;
+        document.getElementById('md-kelas').innerText = data.kelas;
+        document.getElementById('md-umur').innerText = data.umur;
+        document.getElementById('md-jk').innerText = data.jk;
+        document.getElementById('md-hp').innerText = data.hp;
+        document.getElementById('md-email').innerText = data.email;
+        
+        // Skor Terakhir & Status
+        document.getElementById('md-e').innerText = data.skor_e;
+        document.getElementById('md-lbl-e').innerText = data.kategori_e;
+        document.getElementById('md-lbl-e').className = getStatusColor(data.kategori_e);
+
+        document.getElementById('md-c').innerText = data.skor_c;
+        document.getElementById('md-lbl-c').innerText = data.kategori_c;
+        document.getElementById('md-lbl-c').className = getStatusColor(data.kategori_c);
+
+        document.getElementById('md-h').innerText = data.skor_h;
+        document.getElementById('md-lbl-h').innerText = data.kategori_h;
+        document.getElementById('md-lbl-h').className = getStatusColor(data.kategori_h);
+
+        document.getElementById('md-p').innerText = data.skor_p;
+        document.getElementById('md-lbl-p').innerText = data.kategori_p;
+        document.getElementById('md-lbl-p').className = getStatusColor(data.kategori_p);
+
+        document.getElementById('md-pr').innerText = data.skor_pr;
+        document.getElementById('md-lbl-pr').innerText = data.kategori_pr;
+        document.getElementById('md-lbl-pr').className = getStatusColor(data.kategori_pr);
+
+        // Tabel Riwayat
+        let tbody = document.getElementById('md-history-body');
+        if (data.total !== '-') {
+            tbody.innerHTML = `
+                <tr class="border-b border-gray-100">
+                    <td class="px-4 py-3 text-gray-700">${data.tanggal}</td>
+                    <td class="px-2 py-3 text-center text-gray-600">${data.skor_e}</td>
+                    <td class="px-2 py-3 text-center text-gray-600">${data.skor_c}</td>
+                    <td class="px-2 py-3 text-center text-gray-600">${data.skor_h}</td>
+                    <td class="px-2 py-3 text-center text-gray-600">${data.skor_p}</td>
+                    <td class="px-2 py-3 text-center text-gray-600">${data.skor_pr}</td>
+                    <td class="px-4 py-3 text-center font-bold text-gray-900">${data.total}</td>
+                    <td class="px-4 py-3 text-right font-bold ${getStatusColorTable(data.kategori)}">${data.kategori}</td>
+                </tr>
+            `;
+        } else {
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-gray-400 italic">Belum ada tes</td></tr>`;
+        }
+
+        openModal('modal-detail');
     }
 </script>
 @endpush

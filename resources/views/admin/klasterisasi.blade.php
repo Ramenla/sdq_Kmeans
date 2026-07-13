@@ -12,8 +12,7 @@
                 <details class="bg-white rounded-xl shadow-sm border border-gray-100 group" {{ $loaded ? 'open' : '' }}>
                     <summary class="p-4 font-bold text-gray-700 cursor-pointer flex justify-between items-center hover:bg-gray-50 rounded-xl transition-colors">
                         <div class="flex items-center gap-2 text-sm text-[#0066FF]">
-                            <i data-lucide="database" class="w-4 h-4"></i>
-                            <span>Lihat Data Mentah (Sebelum Normalisasi)</span>
+                            <span>Lihat Data Mentah</span>
                             @if($loaded && $dataSiswa)
                                 <span class="ml-2 px-2.5 py-0.5 bg-blue-50 text-[#0066FF] text-[10px] font-bold rounded-full border border-blue-100">
                                     {{ $dataSiswa->total() }} Data
@@ -158,7 +157,10 @@
                         <input type="text" id="input-nama-klastering" placeholder="Nama Klastering (Contoh: Pemetaan Ganjil 2026)" class="w-full sm:w-64 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 text-gray-700 shadow-sm">
                         <input type="number" id="input-jumlah-k" min="2" max="10" value="0" placeholder="Jml K (ex: 3)" class="w-full sm:w-32 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 text-gray-700 text-center font-bold shadow-sm">
                     </div>
-                    <button id="btn-proses-kmeans" class="w-full sm:w-auto px-5 py-2 bg-[#0066FF] text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-all shadow-md flex items-center justify-center">
+                    @php
+                        $canProcess = $loaded && $dataSiswa && !$dataSiswa->isEmpty();
+                    @endphp
+                    <button id="btn-proses-kmeans" class="w-full sm:w-auto px-5 py-2 text-white text-sm font-semibold rounded-lg transition-all shadow-md flex items-center justify-center {{ !$canProcess ? 'bg-gray-400 opacity-60 cursor-not-allowed' : 'bg-[#0066FF] hover:bg-blue-700' }}" {{ !$canProcess ? 'disabled' : '' }}>
                         Proses K-Means
                     </button>
                 </div>
@@ -172,10 +174,10 @@
                         <span id="status-badge" class="text-xs bg-gray-100 text-gray-500 font-bold px-2 py-1 rounded">Status: Menunggu Proses</span>
                     </div>
 
-                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 pt-2">
-                        <div class="xl:col-span-2 flex flex-col space-y-2">
+                    <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 pt-2">
+                        <div class="xl:col-span-3 flex flex-col space-y-2">
                             <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Sebaran Data (PCA 2D)</span>
-                            <div id="scatter-wrapper" class="w-full h-72 bg-gray-50 border border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center text-gray-400">
+                            <div id="scatter-wrapper" class="w-full h-80 bg-gray-50 border border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center text-gray-400">
                                 <i data-lucide="scatter-chart" class="w-10 h-10 text-gray-300 mb-2" id="scatter-placeholder-icon"></i>
                                 <span class="text-xs font-medium" id="scatter-placeholder-text">Scatter Plot PCA Akan Ditampilkan Di Sini</span>
                                 <canvas id="chartScatter" style="display:none;"></canvas>
@@ -283,10 +285,8 @@
     {{-- ============================================================= --}}
     <form action="{{ route('admin.klasterisasi') }}" method="GET" class="w-full lg:w-1/4 bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
 
-        {{-- Hidden input penanda bahwa form sudah di-submit --}}
-        <input type="hidden" name="load" value="1">
-
         <div>
+            <input type="hidden" name="load" value="1">
             <h3 class="text-gray-800 font-bold text-base tracking-tight">Filter dan Metriks</h3>
             <p class="text-xs text-gray-400 mt-1">Konfigurasi data & pilihan variabel kuesioner SDQ.</p>
         </div>
@@ -312,7 +312,7 @@
                     <span>(P) Masalah Teman Sebaya</span>
                 </label>
                 <label class="flex items-center space-x-3 cursor-pointer p-2 bg-blue-50/50 rounded-lg text-gray-700 border border-blue-100/30">
-                    <input type="checkbox" id="cb-diff" name="cb_diff" value="1" {{ (request()->has('load') && request('cb_diff') == '1') ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
+                    <input type="checkbox" id="cb-diff" name="cb_diff" value="1" {{ (!request()->has('load') || request('cb_diff') == '1') ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
                     <span class="font-bold text-[#0066FF]">(Diff) Total Kesulitan</span>
                 </label>
                 <label class="flex items-center space-x-3 cursor-pointer p-1 rounded hover:bg-gray-50">
@@ -362,6 +362,16 @@
                         @foreach($listUmur as $umr)
                             <option value="{{ $umr }}" {{ request('umur') == $umr ? 'selected' : '' }}>{{ $umr }} Tahun</option>
                         @endforeach
+                    </select>
+                </div>
+
+                <div class="space-y-1.5">
+                    <span class="text-xs font-semibold text-gray-500">Kategori</span>
+                    <select name="kategori" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 text-gray-600 shadow-sm">
+                        <option value="">Semua</option>
+                        <option value="Normal" {{ request('kategori') == 'Normal' ? 'selected' : '' }}>Normal</option>
+                        <option value="Borderline" {{ request('kategori') == 'Borderline' ? 'selected' : '' }}>Borderline</option>
+                        <option value="Abnormal" {{ request('kategori') == 'Abnormal' ? 'selected' : '' }}>Abnormal</option>
                     </select>
                 </div>
             </div>
@@ -424,6 +434,8 @@
         // FETCH API: TOMBOL PROSES K-MEANS
         // ===================================================================
         btnProses.addEventListener('click', async function() {
+            if (this.disabled) return;
+            
             const jumlahK = parseInt(inputK.value);
             if (!jumlahK || jumlahK < 2 || jumlahK > 10) {
                 alert('Masukkan nilai K antara 2 sampai 10.');
@@ -462,34 +474,14 @@
                     allHasilData = result.data_siswa || [];
                     const K = result.jumlah_klaster;
 
-                    // Update status badge
-                    statusBadge.textContent = `Status: Berhasil Diproses (K=${K})`;
-                    statusBadge.className = 'text-xs bg-green-100 text-green-700 font-bold px-2 py-1 rounded';
+                    // Simpan ke SessionStorage
+                    sessionStorage.setItem('klasterisasi_result_' + window.location.search, JSON.stringify({
+                        apiResult: result,
+                        inputK: jumlahK,
+                        inputNama: inputNama.value
+                    }));
 
-                    // --- (A) SCATTER PLOT ---
-                    renderScatterPlot(allHasilData, K);
-
-                    // --- (B) CARDS SEBARAN ---
-                    renderClusterCards(result.cluster_counts, result.total_data, K);
-
-                    // --- (C) TABEL HASIL ---
-                    renderTable(allHasilData, K);
-
-                    // --- (D) TABEL PROFIL KLASTER ---
-                    renderProfilKlaster(result.cluster_profiles, K);
-                    updateFilterDropdown(K);
-
-                    // --- (E) TAMPILKAN TOMBOL FEEDBACK ---
-                    if (btnSimpanKlaster) {
-                        btnSimpanKlaster.style.display = 'inline-flex';
-                        btnSimpanKlaster.classList.remove('bg-green-500', 'hover:bg-green-600');
-                        btnSimpanKlaster.classList.add('bg-[#0066FF]', 'hover:bg-blue-700');
-                        btnSimpanKlaster.innerHTML = '<i data-lucide="save" class="w-4 h-4 inline mr-1"></i> Simpan Hasil Klastering';
-                        btnSimpanKlaster.disabled = false;
-                    }
-                    if (btnLihatLaporan) btnLihatLaporan.style.display = 'none'; // Sembunyikan laporan sebelum disimpan
-                    lucide.createIcons();
-
+                    restoreKlasterisasiUI(result, K);
                 } else {
                     statusBadge.textContent = 'Status: Gagal';
                     statusBadge.className = 'text-xs bg-red-100 text-red-700 font-bold px-2 py-1 rounded';
@@ -505,6 +497,50 @@
                 this.disabled = false;
                 this.classList.remove('opacity-60', 'cursor-not-allowed');
                 lucide.createIcons();
+            }
+        });
+
+        // ===================================================================
+        // FUNGSI UNTUK MERENDER SEMUA UI KLASTERISASI
+        // ===================================================================
+        function restoreKlasterisasiUI(result, K) {
+            allHasilData = result.data_siswa || [];
+            
+            statusBadge.textContent = `Status: Berhasil Diproses (K=${K})`;
+            statusBadge.className = 'text-xs bg-green-100 text-green-700 font-bold px-2 py-1 rounded';
+
+            renderScatterPlot(allHasilData, K);
+            renderClusterCards(result.cluster_counts, result.total_data, K);
+            renderTable(allHasilData, K);
+            renderProfilKlaster(result.cluster_profiles, K);
+            updateFilterDropdown(K);
+
+            if (btnSimpanKlaster) {
+                btnSimpanKlaster.style.display = 'inline-flex';
+                btnSimpanKlaster.classList.remove('bg-green-500', 'hover:bg-green-600');
+                btnSimpanKlaster.classList.add('bg-[#0066FF]', 'hover:bg-blue-700');
+                btnSimpanKlaster.innerHTML = '<i data-lucide="save" class="w-4 h-4 inline mr-1"></i> Simpan Hasil Klastering';
+                btnSimpanKlaster.disabled = false;
+            }
+            if (btnLihatLaporan) btnLihatLaporan.style.display = 'none'; 
+            lucide.createIcons();
+        }
+
+        // ===================================================================
+        // RESTORE DARI SESSION STORAGE SAAT HALAMAN DIMUAT
+        // ===================================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentSearch = window.location.search;
+            if (currentSearch) {
+                const saved = sessionStorage.getItem('klasterisasi_result_' + currentSearch);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.inputK) inputK.value = parsed.inputK;
+                    if (parsed.inputNama) inputNama.value = parsed.inputNama;
+                    if (parsed.apiResult && parsed.apiResult.jumlah_klaster) {
+                        restoreKlasterisasiUI(parsed.apiResult, parsed.apiResult.jumlah_klaster);
+                    }
+                }
             }
         });
 

@@ -101,6 +101,16 @@
         <div id="step-identity" class="step-panel active">
             <div class="max-w-2xl mx-auto px-4 py-8 md:py-12">
 
+            {{-- Tombol Kembali --}}
+            <div class="mb-6">
+                <a href="{{ route('landing') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-[#0066FF] transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                    Kembali
+                </a>
+            </div>
+
             {{-- Page Header (outside card) --}}
             <div id="pageHeader" class="text-center mb-8">
                 <h1 class="text-2xl md:text-3xl font-bold text-gray-900">
@@ -286,7 +296,7 @@
             if (!nama) return showError('Nama lengkap wajib diisi.');
             if (!kelas) return showError('Kelas wajib diisi.');
             if (!jk) return showError('Jenis kelamin wajib dipilih.');
-            if (!umur || umur < 4 || umur > 25) return showError('Umur wajib diisi (4-25 tahun).');
+            if (!umur || umur < 4 || umur > 25) return showError('Umur wajib diisi (4-17 tahun).');
 
             hideError();
             stepIdentity.classList.remove('active');
@@ -357,11 +367,6 @@
         window.__selectAnswer = function(num, value) {
             answers[num] = value;
             renderQuestion(num); // re-render to update visual state
-
-            // Auto-advance (except last question)
-            if (num < totalQuestions) {
-                setTimeout(() => goToQuestion(num + 1), 350);
-            }
         };
 
         // =========================
@@ -436,23 +441,13 @@
             if (currentQ < totalQuestions) {
                 btnFinish.classList.add('hidden');
                 btnFinish.classList.remove('inline-flex');
-                if (hasAnswer) {
-                    btnNext.classList.remove('hidden');
-                    btnNext.classList.add('inline-flex');
-                } else {
-                    btnNext.classList.add('hidden');
-                    btnNext.classList.remove('inline-flex');
-                }
+                btnNext.classList.remove('hidden');
+                btnNext.classList.add('inline-flex');
             } else {
                 btnNext.classList.add('hidden');
                 btnNext.classList.remove('inline-flex');
-                if (hasAnswer) {
-                    btnFinish.classList.remove('hidden');
-                    btnFinish.classList.add('inline-flex');
-                } else {
-                    btnFinish.classList.add('hidden');
-                    btnFinish.classList.remove('inline-flex');
-                }
+                btnFinish.classList.remove('hidden');
+                btnFinish.classList.add('inline-flex');
             }
         }
 

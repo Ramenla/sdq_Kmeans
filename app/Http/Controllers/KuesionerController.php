@@ -43,7 +43,9 @@ class KuesionerController extends Controller
     ];
 
     /**
-     * Tampilkan halaman kuesioner publik (Multi-Step Wizard).
+     * Menampilkan Halaman Formulir Kuesioner SDQ.
+     * Fungsi ini memanggil halaman web tempat siswa bisa mengisi data diri
+     * dan menjawab 25 pertanyaan kuesioner SDQ.
      */
     public function showForm()
     {
@@ -53,7 +55,14 @@ class KuesionerController extends Controller
     }
 
     /**
-     * Proses jawaban kuesioner dari guest.
+     * Memproses dan Menyimpan Jawaban Kuesioner.
+     * Fungsi ini sangat penting! Ia bertugas:
+     * 1. Mengecek apakah semua data dan 25 soal sudah diisi dengan benar.
+     * 2. Menghitung skor masing-masing kategori (Emosional, Perilaku, dll) berdasarkan rumus SDQ.
+     * 3. Menyimpan data siswa dan hasil skornya ke dalam database.
+     * 4. Mengarahkan siswa ke halaman hasil.
+     *
+     * @param  \Illuminate\Http\Request  $request  Berisi data diri dan jawaban 25 soal dari siswa.
      */
     public function processForm(Request $request)
     {
@@ -126,15 +135,29 @@ class KuesionerController extends Controller
         // Refresh untuk mendapatkan data yang sudah dihitung oleh model event
         $skorSdq->refresh();
 
-        // 6) Redirect ke halaman hasil
+        // 6) Simpan ID ke session untuk mencegah IDOR (Insecure Direct Object Reference)
+        session(['allowed_hasil_id' => $skorSdq->id]);
+
+        // 7) Redirect ke halaman hasil
         return redirect()->route('kuesioner.hasil', $skorSdq->id);
     }
 
     /**
-     * Tampilkan halaman hasil kuesioner.
+     * Menampilkan Halaman Hasil Kuesioner untuk Siswa.
+     * Setelah siswa selesai mengisi kuesioner, fungsi ini akan dipanggil
+     * untuk menampilkan skor dan kategori kondisi mental mereka.
+     * Ada perlindungan keamanan (session) agar siswa lain tidak bisa saling mengintip hasil.
+     *
+     * @param  int  $id  ID atau nomor urut hasil kuesioner di database.
      */
     public function showHasil($id)
     {
+        // Validasi Keamanan (Mencegah IDOR)
+        // Hanya izinkan akses jika ID di URL sama dengan ID yang ada di session user
+        if (session('allowed_hasil_id') != $id) {
+            abort(403, 'Akses Ditolak: Anda hanya diizinkan untuk melihat hasil tes kuesioner Anda sendiri.');
+        }
+
         $skorSdq = SkorSdq::with('siswa')->findOrFail($id);
 
         return view('kuesioner.hasil', [

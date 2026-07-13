@@ -36,19 +36,20 @@ FEATURE_COLUMNS = ['skor_e', 'skor_c', 'skor_h', 'skor_p', 'skor_pr', 'skor_diff
 
 def _validate_and_extract(payload):
     """
-    Validasi payload JSON dari Laravel dan ekstrak DataFrame
-    untuk variabel yang dikirim (bisa subset dari 5 variabel).
+    Memeriksa dan Mengambil Data (Validasi).
+    Fungsi ini bertugas sebagai 'satpam' yang mengecek paket data yang datang dari web.
+    Ia memastikan datanya tidak kosong dan isinya sesuai dengan yang diharapkan (angka).
+    Jika datanya berantakan atau salah format, ia akan menolaknya.
 
     Parameters
     ----------
     payload : dict
-        JSON body dari request, harus memiliki key 'data' berisi
-        list of dict (setiap dict = 1 baris data siswa).
+        Paket data (JSON) yang dikirim dari web (Laravel).
 
     Returns
     -------
     tuple (pd.DataFrame, flask.Response or None)
-        DataFrame jika valid, atau (None, error_response) jika tidak.
+        Tabel data yang sudah bersih, atau pesan error jika gagal.
     """
     data = payload.get('data')
 
@@ -87,8 +88,9 @@ def _validate_and_extract(payload):
 # ===============================================================
 # ENDPOINT 1: POST /api/preprocess
 # ---------------------------------------------------------------
-# Menerima JSON data mentah → StandardScaler (Z-Score)
-# Mengembalikan data yang sudah distandarisasi.
+# Mengirim Data ke Mesin Python untuk Tahap Awal (Preprocessing).
+# Menerima JSON data mentah → distandarkan menjadi Z-Score
+# Mengembalikan data yang sudah adil (setara bobotnya).
 # ===============================================================
 @app.route('/api/preprocess', methods=['POST'])
 def preprocess():
@@ -121,8 +123,9 @@ def preprocess():
 # ===============================================================
 # ENDPOINT 2: POST /api/elbow
 # ---------------------------------------------------------------
-# Menerima JSON data mentah → StandardScaler → KMeans K=1..10
-# Mengembalikan array Inertia (WCSS) untuk grafik Elbow.
+# Meminta Rekomendasi Jumlah Kelompok (Elbow Method).
+# Menerima data mentah → distandarkan → menghitung KMeans dari K=1 sampai K=10.
+# Mengembalikan titik-titik koordinat untuk menggambar grafik siku (Elbow).
 # ===============================================================
 @app.route('/api/elbow', methods=['POST'])
 def elbow():
@@ -173,9 +176,10 @@ def elbow():
 # ===============================================================
 # ENDPOINT 3: POST /api/kmeans
 # ---------------------------------------------------------------
-# Menerima JSON data mentah DAN parameter 'jumlah_k'
-# → StandardScaler → KMeans(n_clusters=jumlah_k)
-# Mengembalikan label klaster untuk setiap baris data.
+# Mengeksekusi Pembagian Kelompok (Clustering).
+# Menerima data mentah DAN jumlah kelompok (K) yang diminta guru.
+# → data distandarkan → diproses dengan rumus KMeans.
+# Mengembalikan nomor kelompok (label) untuk setiap siswa.
 # ===============================================================
 @app.route('/api/kmeans', methods=['POST'])
 def kmeans_clustering():

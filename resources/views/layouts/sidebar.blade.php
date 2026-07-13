@@ -4,7 +4,7 @@
     </div>
 
     <nav class="flex-1 overflow-y-auto px-4 py-4 space-y-1">
-        <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors duration-200 text-gray-500 hover:bg-gray-50">
+        <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors duration-200 {{ request()->routeIs('admin.dashboard') ? 'bg-[#D9EAFD] text-[#0066FF]' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900' }}">
             <span>Dashboard</span>
         </a>
         <a href="{{ route('dashboard.guru') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors duration-200 {{ request()->routeIs('dashboard.guru') ? 'bg-[#D9EAFD] text-[#0066FF]' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900' }}">

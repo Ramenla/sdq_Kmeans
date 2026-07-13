@@ -12,7 +12,53 @@ use App\Imports\SiswaImport;
 class SiswaController extends Controller
 {
     /**
-     * Simpan data siswa baru ke database.
+     * Menampilkan Halaman Data Siswa.
+     * Fungsi ini bertugas mengambil data siswa dari database (termasuk pencarian dan filter),
+     * lalu menampilkannya di halaman web dalam bentuk tabel yang rapi (dengan paginasi).
+     *
+     * @param  \Illuminate\Http\Request  $request  Data request seperti halaman ke berapa, pencarian, dan filter.
+     */
+    public function index(Request $request)
+    {
+        // Tangkap per_page limit (pilihan: 10, 50, 100. Default: 10)
+        $perPage = $request->query('per_page', 10);
+        if (!in_array($perPage, [10, 50, 100])) {
+            $perPage = 10;
+        }
+
+        $dataSiswa = Siswa::filterAndSort($request)->paginate($perPage);
+
+        // Ambil data filter untuk dropdown dinamis agar selalu sinkron dengan DB riil
+        $listKelas = Siswa::whereNotNull('kelas')
+            ->where('kelas', '!=', '')
+            ->distinct()
+            ->orderBy('kelas')
+            ->pluck('kelas');
+
+        $listUmur = Siswa::distinct()
+            ->orderBy('umur')
+            ->pluck('umur');
+
+        // Mengambil daftar tanggal pemeriksaan yang unik untuk filter dropdown
+        $daftarTanggal = SkorSdq::selectRaw('DATE(tanggal_pemeriksaan) as tanggal_pemeriksaan')
+            ->distinct()
+            ->whereNotNull('tanggal_pemeriksaan')
+            ->orderBy('tanggal_pemeriksaan', 'desc')
+            ->pluck('tanggal_pemeriksaan');
+
+        // Ambil semua data user siswa untuk keperluan CRUD (Edit/Hapus)
+        $listSiswa = Siswa::orderBy('nama_siswa')->get();
+
+        return view('admin.data-siswa', compact('dataSiswa', 'listKelas', 'listUmur', 'daftarTanggal', 'listSiswa'));
+    }
+
+    /**
+     * Menyimpan Data Siswa Baru ke Database.
+     * Fungsi ini dipanggil ketika guru menekan tombol "Simpan" pada form tambah siswa.
+     * Ia akan memeriksa (validasi) apakah data sudah lengkap dan benar,
+     * lalu menyimpannya ke tabel `siswas` dan membuat data kosong/awal di tabel `skor_sdqs`.
+     *
+     * @param  \Illuminate\Http\Request  $request  Data form yang dikirimkan oleh pengguna.
      */
     public function store(Request $request)
     {
@@ -62,7 +108,13 @@ class SiswaController extends Controller
     }
 
     /**
-     * Update data siswa yang sudah ada.
+     * Memperbarui (Update) Data Siswa yang Sudah Ada.
+     * Fungsi ini dijalankan ketika guru mengedit data siswa dan menekan "Simpan Perubahan".
+     * Sama seperti store, fungsi ini akan mengecek kecocokan data,
+     * lalu menyimpan perubahan terbaru ke tabel `siswas` dan `skor_sdqs`.
+     *
+     * @param  \Illuminate\Http\Request  $request  Data perubahan terbaru dari form.
+     * @param  \App\Models\Siswa  $siswa  Data siswa spesifik yang sedang diedit.
      */
     public function update(Request $request, Siswa $siswa)
     {
@@ -118,7 +170,11 @@ class SiswaController extends Controller
     }
 
     /**
-     * Hapus data siswa dari database.
+     * Menghapus Satu Data Siswa dari Database.
+     * Fungsi ini dipanggil saat tombol "Hapus" ditekan pada satu baris siswa.
+     * Seluruh data yang berkaitan dengan siswa tersebut akan terhapus.
+     *
+     * @param  \App\Models\Siswa  $siswa  Data siswa spesifik yang akan dihapus.
      */
     public function destroy(Siswa $siswa)
     {
@@ -128,7 +184,10 @@ class SiswaController extends Controller
     }
 
     /**
-     * Hapus beberapa data siswa sekaligus.
+     * Menghapus Beberapa Data Siswa Sekaligus (Bulk Delete).
+     * Fungsi ini dijalankan jika guru mencentang beberapa siswa sekaligus lalu menekan "Hapus Terpilih".
+     *
+     * @param  \Illuminate\Http\Request  $request  Berisi daftar ID siswa yang dicentang.
      */
     public function bulkDestroy(Request $request)
     {
@@ -143,7 +202,11 @@ class SiswaController extends Controller
     }
 
     /**
-     * Import data dari CSV/Excel.
+     * Mengimpor Data Siswa dari File CSV/Excel.
+     * Fungsi ini mempermudah guru jika ingin memasukkan banyak data siswa
+     * sekaligus dari file Excel tanpa harus mengetik satu per satu.
+     *
+     * @param  \Illuminate\Http\Request  $request  File Excel yang diunggah.
      */
     public function import(Request $request)
     {
@@ -164,7 +227,11 @@ class SiswaController extends Controller
     }
 
     /**
-     * Export data siswa ke Excel dengan filter.
+     * Mengunduh (Ekspor) Data Siswa ke File Excel.
+     * Fungsi ini menghasilkan file `.xlsx` berisi data siswa (beserta hasil kuesionernya)
+     * yang bisa didownload oleh guru untuk keperluan laporan *offline*.
+     *
+     * @param  \Illuminate\Http\Request  $request  Filter yang dipilih sebelum mengunduh data.
      */
     public function export(Request $request)
     {

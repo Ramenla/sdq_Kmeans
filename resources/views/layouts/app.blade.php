@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard Admin')</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ asset('js/tailwindcss.js') }}"></script>
+    <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
+    <script src="{{ asset('js/lucide.js') }}"></script>
+    <script src="{{ asset('js/chart.js') }}"></script>
     <style> 
         body { font-family: 'Inter', sans-serif; background-color: #F4F7FF; }
         .table-container::-webkit-scrollbar, .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
@@ -142,6 +142,9 @@
         </div>
     @endif
 
+    {{-- Overlay untuk Sidebar di Mobile --}}
+    <div id="sidebar-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-30 hidden lg:hidden transition-opacity opacity-0 duration-300"></div>
+
     @include('layouts.sidebar')
 
     <div class="lg:ml-64 transition-all duration-300 flex flex-col min-h-screen" id="main-content">
@@ -186,12 +189,30 @@
             const toggleBtn = document.getElementById('sidebarToggle');
             const sidebar = document.getElementById('logo-sidebar');
             const mainContent = document.getElementById('main-content');
+            const overlay = document.getElementById('sidebar-overlay');
             
-            // Kembalikan transisi CSS setelah render awal selesai (jika sebelumnya dimatikan oleh script inline)
+            // Kembalikan transisi CSS setelah render awal selesai
             setTimeout(() => {
                 if (sidebar) sidebar.style.transition = '';
                 if (mainContent) mainContent.style.transition = '';
             }, 50);
+
+            function toggleMobileSidebar() {
+                sidebar.classList.toggle('-translate-x-full');
+                if (overlay) {
+                    if (sidebar.classList.contains('-translate-x-full')) {
+                        overlay.classList.remove('opacity-100');
+                        setTimeout(() => overlay.classList.add('hidden'), 300);
+                    } else {
+                        overlay.classList.remove('hidden');
+                        setTimeout(() => overlay.classList.add('opacity-100'), 10);
+                    }
+                }
+            }
+
+            if (overlay) {
+                overlay.addEventListener('click', toggleMobileSidebar);
+            }
 
             if (sidebar && toggleBtn) {
                 toggleBtn.addEventListener('click', (e) => {
@@ -204,14 +225,62 @@
                         if (mainContent) mainContent.classList.toggle('lg:ml-64');
                         
                         // Save state to localStorage
-                        sidebarClosed = !sidebar.classList.contains('lg:translate-x-0');
+                        const sidebarClosed = !sidebar.classList.contains('lg:translate-x-0');
                         localStorage.setItem('sidebarClosed', sidebarClosed);
                     } else {
                         // Toggle untuk Mobile
-                        sidebar.classList.toggle('-translate-x-full');
+                        toggleMobileSidebar();
                     }
                 });
             }
+
+            // Fix bug ketika di-resize (memastikan sidebar tidak nyangkut menutupi header)
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= 1024) {
+                    // Kembalikan class -translate-x-full agar state mobile tidak bocor ke desktop
+                    if (sidebar && !sidebar.classList.contains('-translate-x-full')) {
+                        sidebar.classList.add('-translate-x-full');
+                    }
+                    if (overlay) {
+                        overlay.classList.add('hidden');
+                        overlay.classList.remove('opacity-100');
+                    }
+                }
+            });
+        });
+
+        // ==========================================
+        // GLOBAL URL STATE PERSISTENCE
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const currentSearch = window.location.search;
+            const storageKey = 'last_url_' + currentPath;
+
+            // Jangan terapkan pada halaman login atau root jika tidak diinginkan
+            if(currentPath.includes('login') || currentPath === '/') return;
+
+            // Jika URL memiliki parameter, simpan state tersebut
+            if (currentSearch) {
+                sessionStorage.setItem(storageKey, currentSearch);
+            }
+
+            // Ganti URL pada link sidebar secara langsung, sehingga saat diklik 
+            // browser tidak perlu memuat halaman kosong lalu redirect (mencegah kedipan/reload 2 kali).
+            const sidebarLinks = document.querySelectorAll('aside nav a');
+            sidebarLinks.forEach(link => {
+                try {
+                    const url = new URL(link.href);
+                    if (url.origin === window.location.origin) {
+                        const savedQuery = sessionStorage.getItem('last_url_' + url.pathname);
+                        if (savedQuery && savedQuery !== '?') {
+                            link.href = url.pathname + savedQuery;
+                        }
+                    }
+                } catch (e) {
+                    // Abaikan jika href bukan URL valid
+                }
+            });
         });
     </script>
     @stack('scripts')

@@ -9,10 +9,20 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // 1. Menampilkan Halaman Form (Kita buat tampilannya nanti)
+    /**
+     * Menampilkan Halaman Form Login.
+     * Fungsi ini bertugas memanggil tampilan (view) form login untuk guru.
+     */
     public function showLoginGuru() { return view('auth.login-guru'); }
 
-    // 2. Proses Login (Digunakan oleh Guru BK)
+    /**
+     * Memproses Data Login.
+     * Fungsi ini dipanggil ketika guru menekan tombol "Login".
+     * Menerima kiriman email dan password, memvalidasinya, lalu mengecek ke database.
+     * Jika cocok, pengguna diizinkan masuk ke halaman dashboard.
+     *
+     * @param  \Illuminate\Http\Request  $request  Berisi data inputan form dari pengguna.
+     */
     public function processLogin(Request $request)
     {
         // Validasi input form
@@ -27,8 +37,8 @@ class AuthController extends Controller
             // Jika berhasil, buat ulang sesi untuk keamanan (mencegah session fixation)
             $request->session()->regenerate();
 
-            // Langsung arahkan ke dashboard guru bk (intended route)
-            return redirect()->intended(route('dashboard.guru'));
+            // Langsung arahkan ke dashboard (intended route)
+            return redirect()->intended(route('admin.dashboard'));
         }
 
         // Jika email/password salah, kembalikan ke halaman sebelumnya dengan pesan error
@@ -37,7 +47,13 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    // 3. Proses Logout
+    /**
+     * Memproses Logout (Keluar).
+     * Fungsi ini dipanggil ketika guru menekan tombol logout.
+     * Akan menghapus sesi yang aktif dan mengembalikan pengguna ke halaman login.
+     *
+     * @param  \Illuminate\Http\Request  $request  Data sesi pengguna saat ini.
+     */
     public function logout(Request $request)
     {
         Auth::logout();
