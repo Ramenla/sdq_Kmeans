@@ -10,7 +10,8 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     libonig-dev \
-    libxml2-dev
+    libxml2-dev \
+    libzip-dev
 
 # Install Node.js & npm (untuk build tailwind/vite)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
@@ -21,7 +22,7 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install ekstensi PHP yang dibutuhkan Laravel
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
 # Aktifkan mod_rewrite Apache (wajib untuk routing Laravel)
 RUN a2enmod rewrite
