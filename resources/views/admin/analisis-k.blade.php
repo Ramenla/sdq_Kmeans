@@ -268,10 +268,9 @@
     {{-- SIDEBAR: FILTER DAN METRIKS (Kanan) --}}
     {{-- ============================================================= --}}
     <form action="{{ route('admin.analisis') }}" method="GET" class="w-full lg:w-1/4 bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
-        {{-- Hidden input penanda bahwa form sudah di-submit --}}
-        <input type="hidden" name="load" value="1">
 
         <div>
+            <input type="hidden" name="load" value="1">
             <h3 class="text-gray-800 font-bold text-base tracking-tight">Filter dan Metriks</h3>
             <p class="text-xs text-gray-400 mt-1">Konfigurasi data & pilihan variabel kuesioner SDQ.</p>
         </div>
@@ -297,7 +296,7 @@
                     <span>(P) Masalah Teman Sebaya</span>
                 </label>
                 <label class="flex items-center space-x-3 cursor-pointer p-2 bg-blue-50/50 rounded-lg text-gray-700 border border-blue-100/30">
-                    <input type="checkbox" id="cb-diff" name="cb_diff" value="1" {{ (request()->has('load') && request('cb_diff') == '1') ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
+                    <input type="checkbox" id="cb-diff" name="cb_diff" value="1" {{ (!request()->has('load') || request('cb_diff') == '1') ? 'checked' : '' }} class="w-4 h-4 rounded text-[#0066FF] border-gray-300 focus:ring-blue-500">
                     <span class="font-bold text-[#0066FF]">(Diff) Total Kesulitan</span>
                 </label>
                 <label class="flex items-center space-x-3 cursor-pointer p-1 rounded hover:bg-gray-50">
